@@ -13,6 +13,7 @@
   --page-header-color: #002B6E;
   --detail-bg: #f8f9fa;
   --detail-color: #555555;
+  --detail-value-color: #002B6E;
   --link-color: #0085CA;
   --navbar-text: #ffffff;
   --btn-text: #ffffff;
@@ -170,7 +171,7 @@ body {
 .nfc-public .info-list { display: flex; flex-direction: column; gap: 3px; }
 .nfc-public .info-row { display: flex; gap: 12px; padding: 3px 0; }
 .nfc-public .info-row label { flex: 0 0 100px; font-size: 0.85rem; color: var(--detail-color); font-weight: 500; }
-.nfc-public .info-row span { flex: 1; font-size: 0.9rem; font-weight: 600; color: var(--heading-color); }
+.nfc-public .info-row span { flex: 1; font-size: 0.9rem; font-weight: 600; color: var(--detail-value-color); }
 
 /* Vehicle detail */
 .vehicle-detail .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
@@ -178,7 +179,7 @@ body {
 .vehicle-detail .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
 .vehicle-detail .info-item { background: var(--detail-bg); padding: 15px; border-radius: 8px; }
 .vehicle-detail .info-item label { display: block; font-size: 0.8rem; color: var(--detail-color); text-transform: uppercase; font-weight: 600; }
-.vehicle-detail .info-item span { font-size: 1.1rem; font-weight: 600; color: var(--navy); }
+.vehicle-detail .info-item span { font-size: 1.1rem; font-weight: 600; color: var(--detail-value-color); }
 
 /* Documents */
 .doc-list .doc-item {
