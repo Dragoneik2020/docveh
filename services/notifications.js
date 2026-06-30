@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const twilio = require('twilio');
 const { pool } = require('../models/db');
 
 async function getSetting(key) {
@@ -29,26 +28,20 @@ async function sendEmail(to, subject, text) {
   }
 }
 
-async function getTwilioClient() {
-  const sid = await getSetting('twilio_account_sid') || process.env.TWILIO_ACCOUNT_SID;
-  const token = await getSetting('twilio_auth_token') || process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) return null;
-  return twilio(sid, token);
-}
-
 async function sendWhatsApp(to, message) {
-  const client = await getTwilioClient();
-  if (!client) return;
-  const from = await getSetting('twilio_whatsapp_number') || process.env.TWILIO_WHATSAPP_NUMBER;
-  if (!from) return;
+  const url = await getSetting('openwa_url') || process.env.OPENWA_URL;
+  if (!url) return;
+  const token = await getSetting('openwa_token') || process.env.OPENWA_TOKEN;
   try {
-    await client.messages.create({
-      from: 'whatsapp:' + from,
-      body: message,
-      to: 'whatsapp:' + to,
+    const body = { to, message };
+    if (token) body.token = token;
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     });
   } catch (err) {
-    console.error('  WhatsApp error:', err.message);
+    console.error('  OpenWA error:', err.message);
   }
 }
 

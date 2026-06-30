@@ -215,9 +215,8 @@ async function init() {
       ['smtp_user', ''],
       ['smtp_pass', ''],
       ['smtp_from', ''],
-      ['twilio_account_sid', ''],
-      ['twilio_auth_token', ''],
-      ['twilio_whatsapp_number', ''],
+      ['openwa_url', ''],
+      ['openwa_token', ''],
     ];
     for (const [k, v] of defaultSettings) {
       await pool.query(
