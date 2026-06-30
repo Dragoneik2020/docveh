@@ -396,12 +396,15 @@ router.get('/admin/import-legacy-data', adminAuth, async (req, res) => {
     await pool.query("SELECT setval('plans_id_seq', (SELECT MAX(id) FROM plans))");
     await pool.query("SELECT setval('users_id_seq', (SELECT MAX(id) FROM users))");
 
-    // Import vehicles
+    // Import vehicles (only if user exists)
     for (const row of data.vehicles) {
-      await pool.query(
-        'INSERT INTO vehicles (id, user_id, brand, model, year, plate, vin, owner_name, owner_dni, color, fuel_type, engine_capacity, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (id) DO NOTHING',
-        [row.id, row.user_id, row.brand, row.model, row.year, row.plate, row.vin, row.owner_name, row.owner_dni, row.color, row.fuel_type, row.engine_capacity, row.created_at]
-      );
+      const { rows: u } = await pool.query('SELECT id FROM users WHERE id = $1', [row.user_id]);
+      if (u.length > 0) {
+        await pool.query(
+          'INSERT INTO vehicles (id, user_id, brand, model, year, plate, vin, owner_name, owner_dni, color, fuel_type, engine_capacity, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (id) DO NOTHING',
+          [row.id, row.user_id, row.brand, row.model, row.year, row.plate, row.vin, row.owner_name, row.owner_dni, row.color, row.fuel_type, row.engine_capacity, row.created_at]
+        );
+      }
     }
 
     // Import documents
@@ -412,20 +415,26 @@ router.get('/admin/import-legacy-data', adminAuth, async (req, res) => {
       );
     }
 
-    // Import subscriptions
+    // Import subscriptions (only if user exists)
     for (const row of data.subscriptions) {
-      await pool.query(
-        'INSERT INTO subscriptions (id, user_id, plan_id, status, started_at, expires_at, source) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING',
-        [row.id, row.user_id, row.plan_id, row.status, row.started_at, row.expires_at, row.source]
-      );
+      const { rows: u } = await pool.query('SELECT id FROM users WHERE id = $1', [row.user_id]);
+      if (u.length > 0) {
+        await pool.query(
+          'INSERT INTO subscriptions (id, user_id, plan_id, status, started_at, expires_at, source) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING',
+          [row.id, row.user_id, row.plan_id, row.status, row.started_at, row.expires_at, row.source]
+        );
+      }
     }
 
-    // Import payments
+    // Import payments (only if user exists)
     for (const row of data.payments) {
-      await pool.query(
-        'INSERT INTO payments (id, user_id, plan_id, amount, reference, status, flow_order, flow_url, flow_token, created_at, confirmed_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING',
-        [row.id, row.user_id, row.plan_id, row.amount, row.reference, row.status, row.flow_order, row.flow_url, row.flow_token, row.created_at, row.confirmed_at]
-      );
+      const { rows: u } = await pool.query('SELECT id FROM users WHERE id = $1', [row.user_id]);
+      if (u.length > 0) {
+        await pool.query(
+          'INSERT INTO payments (id, user_id, plan_id, amount, reference, status, flow_order, flow_url, flow_token, created_at, confirmed_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING',
+          [row.id, row.user_id, row.plan_id, row.amount, row.reference, row.status, row.flow_order, row.flow_url, row.flow_token, row.created_at, row.confirmed_at]
+        );
+      }
     }
 
     // Import NFC links
