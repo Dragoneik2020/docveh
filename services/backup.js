@@ -19,7 +19,7 @@ async function getAllTableData() {
   );
   const data = {};
   for (const { table_name } of tables) {
-    const { rows } = await pool.query(`SELECT * FROM ${table_name} ORDER BY id`);
+    const { rows } = await pool.query(`SELECT * FROM ${table_name} ORDER BY 1`);
     data[table_name] = rows;
   }
   return data;
