@@ -1,19 +1,22 @@
 const db = require('./db');
 
-function getAll() {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
+async function getAll() {
+  const rows = await db.all('SELECT key, value FROM settings');
   const s = {};
   for (const r of rows) s[r.key] = r.value;
   return s;
 }
 
-function get(key) {
-  const r = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+async function get(key) {
+  const r = await db.get('SELECT value FROM settings WHERE key = $1', [key]);
   return r ? r.value : null;
 }
 
-function set(key, value) {
-  db.prepare('INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, ?)').run(key, value, new Date().toISOString());
+async function set(key, value) {
+  await db.run(
+    'INSERT INTO settings (key, value, updated_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at',
+    [key, value, new Date().toISOString()]
+  );
 }
 
 module.exports = { getAll, get, set };

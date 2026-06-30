@@ -29,59 +29,67 @@ const uploadAvatar = multer({
   }
 });
 
-router.get('/profile', auth, (req, res) => {
-  const user = db.prepare('SELECT u.*, p.name as plan_name, p.max_vehicles FROM users u JOIN plans p ON u.plan_id = p.id WHERE u.id = ?').get(req.session.userId);
-  const error = req.query.error || null;
-  const success = req.query.success || null;
-  const recentLogs = db.prepare('SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT 10').all(req.session.userId);
-  res.render('profile', { user, error, success, recentLogs });
+router.get('/profile', auth, async (req, res) => {
+  try {
+    const user = await db.get('SELECT u.*, p.name as plan_name, p.max_vehicles FROM users u JOIN plans p ON u.plan_id = p.id WHERE u.id = $1', [req.session.userId]);
+    const error = req.query.error || null;
+    const success = req.query.success || null;
+    const recentLogs = await db.all('SELECT * FROM activity_log WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', [req.session.userId]);
+    res.render('profile', { user, error, success, recentLogs });
+  } catch (err) {
+    res.redirect('/dashboard');
+  }
 });
 
 router.post('/profile', auth, (req, res) => {
-  uploadAvatar.single('avatar')(req, res, (err) => {
+  uploadAvatar.single('avatar')(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err.message);
       return res.redirect('/profile?error=' + encodeURIComponent(err.message || 'Error al subir imagen'));
     }
 
-    const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+    try {
+      const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
+      const user = await db.get('SELECT * FROM users WHERE id = $1', [req.session.userId]);
 
-    const finalName = (name && name.trim()) ? name.trim() : user.name;
-    const finalEmail = (email && email.trim()) ? email.trim() : user.email;
+      const finalName = (name && name.trim()) ? name.trim() : user.name;
+      const finalEmail = (email && email.trim()) ? email.trim() : user.email;
 
-    if (newPassword) {
-      if (!user.password) {
-        return res.redirect('/profile?error=Los usuarios de Google deben establecer una contraseña desde la opción correspondiente');
+      if (newPassword) {
+        if (!user.password) {
+          return res.redirect('/profile?error=Los usuarios de Google deben establecer una contraseña desde la opción correspondiente');
+        }
+        if (!bcrypt.compareSync(currentPassword, user.password)) {
+          return res.redirect('/profile?error=La contraseña actual no es correcta');
+        }
+        if (newPassword.length < 6) {
+          return res.redirect('/profile?error=La nueva contraseña debe tener al menos 6 caracteres');
+        }
+        if (newPassword !== confirmPassword) {
+          return res.redirect('/profile?error=Las contraseñas no coinciden');
+        }
+        const hash = bcrypt.hashSync(newPassword, 10);
+        await db.run('UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4', [finalName, finalEmail, hash, req.session.userId]);
+      } else {
+        await db.run('UPDATE users SET name = $1, email = $2 WHERE id = $3', [finalName, finalEmail, req.session.userId]);
       }
-      if (!bcrypt.compareSync(currentPassword, user.password)) {
-        return res.redirect('/profile?error=La contraseña actual no es correcta');
+
+      if (req.file) {
+        console.log('Avatar file received:', req.file.filename, req.file.path);
+        const oldFiles = fs.readdirSync(avatarsDir).filter(f => f.startsWith(req.session.userId + '.'));
+        oldFiles.forEach(f => { try { fs.unlinkSync(path.join(avatarsDir, f)); } catch (e) {} });
+        const avatarPath = '/uploads/avatars/' + req.file.filename;
+        await db.run('UPDATE users SET avatar = $1 WHERE id = $2', [avatarPath, req.session.userId]);
+      } else {
+        console.log('No file received, body keys:', Object.keys(req.body));
       }
-      if (newPassword.length < 6) {
-        return res.redirect('/profile?error=La nueva contraseña debe tener al menos 6 caracteres');
-      }
-      if (newPassword !== confirmPassword) {
-        return res.redirect('/profile?error=Las contraseñas no coinciden');
-      }
-      const hash = bcrypt.hashSync(newPassword, 10);
-      db.prepare('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?').run(finalName, finalEmail, hash, req.session.userId);
-    } else {
-      db.prepare('UPDATE users SET name = ?, email = ? WHERE id = ?').run(finalName, finalEmail, req.session.userId);
+
+      req.session.userName = finalName;
+      await activity.log(req.session.userId, 'PROFILE_UPDATED', 'Perfil actualizado', { ip: req.ip });
+      res.redirect('/profile?success=Perfil actualizado correctamente');
+    } catch (err) {
+      res.redirect('/profile?error=Error al actualizar perfil');
     }
-
-    if (req.file) {
-      console.log('Avatar file received:', req.file.filename, req.file.path);
-      const oldFiles = fs.readdirSync(avatarsDir).filter(f => f.startsWith(req.session.userId + '.'));
-      oldFiles.forEach(f => { try { fs.unlinkSync(path.join(avatarsDir, f)); } catch (e) {} });
-      const avatarPath = '/uploads/avatars/' + req.file.filename;
-      db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatarPath, req.session.userId);
-    } else {
-      console.log('No file received, body keys:', Object.keys(req.body));
-    }
-
-    req.session.userName = finalName;
-    activity.log(req.session.userId, 'PROFILE_UPDATED', 'Perfil actualizado', { ip: req.ip });
-    res.redirect('/profile?success=Perfil actualizado correctamente');
   });
 });
 
