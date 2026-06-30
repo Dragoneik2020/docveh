@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const dbDir = path.join(__dirname, '..');
-const backupDir = path.join(dbDir, 'backups');
-const dbPath = path.join(dbDir, 'database.sqlite');
+const { pool } = require('../models/db');
+const backupDir = path.join(__dirname, '..', 'backups');
 const MAX_BACKUPS = 7;
 let lastBackupTime = 0;
 
@@ -12,13 +11,24 @@ function ensureBackupDir() {
   }
 }
 
-function createBackup() {
+async function getAllTableData() {
+  const { rows: tables } = await pool.query(
+    `SELECT table_name FROM information_schema.tables
+     WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+     ORDER BY table_name`
+  );
+  const data = {};
+  for (const { table_name } of tables) {
+    const { rows } = await pool.query(`SELECT * FROM ${table_name} ORDER BY id`);
+    data[table_name] = rows;
+  }
+  return data;
+}
+
+async function createBackup() {
   try {
-    if (!fs.existsSync(dbPath)) {
-      console.log('  Backup: database.sqlite no encontrado, se omite');
-      return null;
-    }
     ensureBackupDir();
+    const data = await getAllTableData();
     const date = new Date();
     const timestamp = date.getFullYear() +
       String(date.getMonth() + 1).padStart(2, '0') +
@@ -26,8 +36,8 @@ function createBackup() {
       String(date.getHours()).padStart(2, '0') +
       String(date.getMinutes()).padStart(2, '0') +
       String(date.getSeconds()).padStart(2, '0');
-    const backupFile = path.join(backupDir, 'database_' + timestamp + '.sqlite');
-    fs.copyFileSync(dbPath, backupFile);
+    const backupFile = path.join(backupDir, 'database_' + timestamp + '.json');
+    fs.writeFileSync(backupFile, JSON.stringify(data, null, 2), 'utf-8');
     lastBackupTime = Date.now();
     console.log('  Backup: ' + backupFile);
     cleanOldBackups();
@@ -49,7 +59,7 @@ function backupIfNeeded(minIntervalMinutes) {
 function cleanOldBackups() {
   try {
     const files = fs.readdirSync(backupDir)
-      .filter(f => f.startsWith('database_') && f.endsWith('.sqlite'))
+      .filter(f => f.startsWith('database_') && f.endsWith('.json'))
       .map(f => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtimeMs }))
       .sort((a, b) => b.time - a.time);
     if (files.length > MAX_BACKUPS) {
@@ -66,7 +76,7 @@ function listBackups() {
   try {
     if (!fs.existsSync(backupDir)) return [];
     return fs.readdirSync(backupDir)
-      .filter(f => f.startsWith('database_') && f.endsWith('.sqlite'))
+      .filter(f => f.startsWith('database_') && f.endsWith('.json'))
       .map(f => {
         const stat = fs.statSync(path.join(backupDir, f));
         const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);

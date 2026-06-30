@@ -123,7 +123,7 @@ router.get('/admin/backups', adminAuth, (req, res) => {
 });
 
 router.post('/admin/backups/create', adminAuth, async (req, res) => {
-  const file = backup.createBackup();
+  const file = await backup.createBackup();
   if (file) {
     await activity.log(req.session.userId, 'BACKUP_CREATED', 'Backup manual creado: ' + path.basename(file), { ip: req.ip });
     res.redirect('/admin/backups?msg=Backup creado: ' + path.basename(file));
