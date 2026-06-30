@@ -381,12 +381,15 @@ router.get('/admin/import-legacy-data', adminAuth, async (req, res) => {
       );
     }
 
-    // Import users
+    // Import users (skip by email to avoid conflict with seeded accounts)
     for (const row of data.users) {
-      await pool.query(
-        'INSERT INTO users (id, name, email, password, google_id, avatar, role, plan_id, subscription_end, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING',
-        [row.id, row.name, row.email, row.password, row.google_id, row.avatar, row.role, row.plan_id, row.subscription_end, row.created_at]
-      );
+      const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [row.email]);
+      if (existing.length === 0) {
+        await pool.query(
+          'INSERT INTO users (id, name, email, password, google_id, avatar, role, plan_id, subscription_end, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING',
+          [row.id, row.name, row.email, row.password, row.google_id, row.avatar, row.role, row.plan_id, row.subscription_end, row.created_at]
+        );
+      }
     }
 
     // Reset sequences
