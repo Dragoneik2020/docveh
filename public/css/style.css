@@ -11,6 +11,8 @@
   --heading-color: #002B6E;
   --secondary-heading-color: #002B6E;
   --page-header-color: #002B6E;
+  --detail-bg: #f8f9fa;
+  --detail-color: #555555;
   --link-color: #0085CA;
   --navbar-text: #ffffff;
   --btn-text: #ffffff;
@@ -161,21 +163,21 @@ body {
 .vehicle-card:hover { transform: translateY(-5px); }
 .vehicle-card h3 { color: var(--navy); margin-bottom: 10px; }
 .vehicle-card .plate { color: var(--cyan); font-weight: 700; font-size: 1.1rem; }
-.vehicle-card .detail { color: #666; font-size: 0.9rem; margin: 4px 0; }
+.vehicle-card .detail { color: var(--detail-color); font-size: 0.9rem; margin: 4px 0; }
 .vehicle-card .actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* NFC Public View */
 .nfc-public .info-list { display: flex; flex-direction: column; gap: 3px; }
 .nfc-public .info-row { display: flex; gap: 12px; padding: 3px 0; }
-.nfc-public .info-row label { flex: 0 0 100px; font-size: 0.85rem; color: #666; font-weight: 500; }
+.nfc-public .info-row label { flex: 0 0 100px; font-size: 0.85rem; color: var(--detail-color); font-weight: 500; }
 .nfc-public .info-row span { flex: 1; font-size: 0.9rem; font-weight: 600; color: var(--heading-color); }
 
 /* Vehicle detail */
 .vehicle-detail .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 .vehicle-detail .header h1 { font-size: 1.8rem; }
 .vehicle-detail .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-.vehicle-detail .info-item { background: #f8f9fa; padding: 15px; border-radius: 8px; }
-.vehicle-detail .info-item label { display: block; font-size: 0.8rem; color: #888; text-transform: uppercase; font-weight: 600; }
+.vehicle-detail .info-item { background: var(--detail-bg); padding: 15px; border-radius: 8px; }
+.vehicle-detail .info-item label { display: block; font-size: 0.8rem; color: var(--detail-color); text-transform: uppercase; font-weight: 600; }
 .vehicle-detail .info-item span { font-size: 1.1rem; font-weight: 600; color: var(--navy); }
 
 /* Documents */
@@ -184,7 +186,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px;
-  background: #f8f9fa;
+  background: var(--detail-bg);
   border-radius: 8px;
   margin-bottom: 10px;
   transition: background 0.3s;
@@ -193,7 +195,7 @@ body {
 .doc-item .doc-info { display: flex; align-items: center; gap: 15px; }
 .doc-item .doc-icon { font-size: 1.5rem; }
 .doc-item .doc-name { font-weight: 600; }
-.doc-item .doc-date { color: #888; font-size: 0.85rem; }
+.doc-item .doc-date { color: var(--detail-color); font-size: 0.85rem; }
 .doc-item .doc-type { 
   display: inline-block; 
   padding: 2px 10px; 

@@ -88,6 +88,11 @@
               <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.page_header_color || '#002B6E' %></span>
             </div>
             <div class="form-group">
+              <label>Color datos ficha vehículo</label>
+              <input type="color" name="detail_color" value="<%= settings.detail_color || '#555555' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.detail_color || '#555555' %></span>
+            </div>
+            <div class="form-group">
               <label>Color de enlaces</label>
               <input type="color" name="link_color" value="<%= settings.link_color %>">
               <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.link_color %></span>
@@ -124,6 +129,11 @@
               <label>Borde de tarjetas</label>
               <input type="color" name="card_border" value="<%= settings.card_border %>">
               <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.card_border %></span>
+            </div>
+            <div class="form-group">
+              <label>Fondo datos ficha vehículo</label>
+              <input type="color" name="detail_bg" value="<%= settings.detail_bg || '#f8f9fa' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.detail_bg || '#f8f9fa' %></span>
             </div>
           </div>
         </div>

@@ -189,6 +189,8 @@ async function init() {
       ['heading_color', '#002B6E'],
       ['secondary_heading_color', '#002B6E'],
       ['page_header_color', '#002B6E'],
+      ['detail_bg', '#f8f9fa'],
+      ['detail_color', '#555555'],
       ['link_color', '#0085CA'],
       ['navbar_text_color', '#ffffff'],
       ['button_text_color', '#ffffff'],
