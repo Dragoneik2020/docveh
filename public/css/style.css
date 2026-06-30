@@ -10,6 +10,7 @@
   --text-color: #333333;
   --heading-color: #002B6E;
   --secondary-heading-color: #002B6E;
+  --page-header-color: #002B6E;
   --link-color: #0085CA;
   --navbar-text: #ffffff;
   --btn-text: #ffffff;
@@ -143,7 +144,7 @@ body {
   align-items: center;
   margin: 30px 0 20px;
 }
-.dashboard-header h1 { font-size: 1.8rem; color: var(--navy); }
+.dashboard-header h1 { font-size: 1.8rem; color: var(--page-header-color); }
 
 .vehicle-grid {
   display: grid;
