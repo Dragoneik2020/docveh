@@ -38,6 +38,7 @@ passport.use(new GoogleStrategy({
           password: null
         };
         await db.query('INSERT INTO users (name, email, google_id, avatar, password) VALUES ($1, $2, $3, $4, $5)', [info.name, info.email, info.google_id, info.avatar, info.password]);
+        notifyNewUser({ name: info.name, email: info.email });
         user = await db.get('SELECT * FROM users WHERE google_id = $1', [profile.id]);
       }
     }
@@ -91,6 +92,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const backup = require('./services/backup');
+const { notifyNewUser } = require('./services/notifications');
 const auth = require('./middleware/auth');
 
 async function expireSubscriptions() {

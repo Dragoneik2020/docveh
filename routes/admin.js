@@ -7,6 +7,7 @@ const settings = require('../models/settings');
 const adminAuth = require('../middleware/admin');
 const activity = require('../models/activity');
 const backup = require('../services/backup');
+const { notifyNewUser } = require('../services/notifications');
 const router = express.Router();
 
 const logoUpload = multer({ dest: path.join(__dirname, '..', 'tmp') }).single('logo_file');
@@ -184,6 +185,7 @@ router.post('/admin/user/new', adminAuth, async (req, res) => {
     require('fs').mkdirSync(path.join(__dirname, '..', 'public', 'uploads', String(result.rows[0].id)), { recursive: true });
 
     await activity.log(req.session.userId, 'ADMIN_CREATE_USER', `Usuario ${name} (${email}) creado por administrador`, { ip: req.ip });
+    notifyNewUser({ name, email });
 
     if (plan.price > 0) {
       const end = new Date();

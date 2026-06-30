@@ -118,6 +118,22 @@
         <% } %>
       </div>
 
+      <div class="card">
+        <h3>Notificaciones</h3>
+        <div class="settings-group">
+          <div class="form-group">
+            <label>Email para notificaciones de registro</label>
+            <input type="email" name="notification_email" placeholder="admin@correo.com" value="<%= settings.notification_email %>">
+            <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;">Se enviará un correo cuando alguien se registre. Requiere SMTP configurado (variables de entorno).</span>
+          </div>
+          <div class="form-group">
+            <label>WhatsApp para notificaciones (número admin)</label>
+            <input type="text" name="admin_phone" placeholder="+56912345678" value="<%= settings.admin_phone %>">
+            <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;">Se enviará un mensaje WhatsApp cuando alguien se registre. Requiere Twilio configurado (variables de entorno).</span>
+          </div>
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem;margin-bottom:30px;">Guardar Configuración</button>
     </form>
   </div>

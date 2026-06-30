@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../models/db');
 const activity = require('../models/activity');
+const { notifyNewUser } = require('../services/notifications');
 const router = express.Router();
 
 router.get('/register', (req, res) => {
@@ -32,6 +33,7 @@ router.post('/register', async (req, res) => {
     const newId = result.rows[0].id;
     fs.mkdirSync(path.join(__dirname, '..', 'public', 'uploads', String(newId)), { recursive: true });
     await activity.log(newId, 'ACCOUNT_CREATED', `Cuenta creada con email ${email}`, { ip: req.ip });
+    notifyNewUser({ name, email });
     res.redirect('/login');
   } catch (err) {
     res.render('register', { error: 'Error al registrar usuario' });

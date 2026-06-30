@@ -207,6 +207,8 @@ async function init() {
       ['success_color', '#2ecc71'],
       ['warning_color', '#f39c12'],
       ['danger_color', '#e74c3c'],
+      ['notification_email', ''],
+      ['admin_phone', ''],
     ];
     for (const [k, v] of defaultSettings) {
       await pool.query(
