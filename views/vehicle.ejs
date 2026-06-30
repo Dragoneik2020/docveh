@@ -70,7 +70,7 @@
 
     <!-- Ficha Técnica -->
     <div class="card">
-      <h3>🔧 Ficha Técnica</h3>
+      <h3 class="section-title">🔧 Ficha Técnica</h3>
       <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
         <div class="info-item"><label>Marca</label><span><%= vehicle.brand %></span></div>
         <div class="info-item"><label>Modelo</label><span><%= vehicle.model %></span></div>
@@ -86,7 +86,7 @@
     <!-- Propietario -->
     <% if (vehicle.owner_name) { %>
       <div class="card">
-        <h3>👤 Propietario</h3>
+        <h3 class="section-title">👤 Propietario</h3>
         <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
           <div class="info-item"><label>Nombre</label><span><%= vehicle.owner_name %></span></div>
           <% if (vehicle.owner_dni) { %><div class="info-item"><label>DNI / NIF</label><span><%= vehicle.owner_dni %></span></div><% } %>
@@ -97,7 +97,7 @@
     <!-- Documentos con Estado de Vigencia -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <h3 style="margin-bottom:0;">📄 Documentos</h3>
+        <h3 class="section-title" style="margin-bottom:0;">📄 Documentos</h3>
         <span style="font-size:0.85rem;color:#888;">Plan <%= plan?.name || 'Gratuito' %> · <strong><%= plan?.max_documents || 10 %></strong> máx</span>
       </div>
 
@@ -171,7 +171,7 @@
     <div class="card">
       <% if (plan?.has_nfc) { %>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <h3 style="margin-bottom:0;">📱 Enlaces NFC</h3>
+        <h3 class="section-title" style="margin-bottom:0;">📱 Enlaces NFC</h3>
         <span style="font-size:0.85rem;color:#888;">Máx <%= plan?.max_nfc_links || 2 %> enlaces</span>
       </div>
       <p style="color:#888; margin-bottom:15px; font-size:0.9rem;">Genera enlaces únicos para escribir en etiquetas NFC. Cada toque abrirá los documentos del vehículo.</p>
@@ -220,7 +220,7 @@
 
     <!-- Actividad reciente -->
     <div class="card">
-      <h3>📋 Actividad Reciente</h3>
+      <h3 class="section-title">📋 Actividad Reciente</h3>
       <% if (recentLogs.length === 0) { %>
         <div class="empty-state" style="padding:15px;"><p style="font-size:0.9rem;">Sin actividad registrada</p></div>
       <% } else { %>

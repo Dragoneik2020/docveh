@@ -30,7 +30,7 @@
       <div class="nfc-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
         <div class="card" style="background: #f8f9fa;">
-          <h3 style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--cyan); color:#1a1a2e;">🔧 Ficha Técnica</h3>
+          <h3 class="section-title" style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--cyan);">🔧 Ficha Técnica</h3>
           <div class="info-list">
             <div class="info-row"><label>Marca</label><span><%= vehicle.brand %></span></div>
             <div class="info-row"><label>Modelo</label><span><%= vehicle.model %></span></div>
@@ -45,7 +45,7 @@
 
         <% if (vehicle.owner_name) { %>
         <div class="card" style="background: #f8f9fa;">
-          <h3 style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--warning); color:#1a1a2e;">👤 Propietario</h3>
+          <h3 class="section-title" style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--warning);">👤 Propietario</h3>
           <div class="info-list">
             <div class="info-row"><label>Nombre</label><span><%= vehicle.owner_name %></span></div>
             <% if (vehicle.owner_dni) { %><div class="info-row"><label>DNI / NIF</label><span><%= vehicle.owner_dni %></span></div><% } %>

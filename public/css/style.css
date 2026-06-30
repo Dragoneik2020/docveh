@@ -11,6 +11,7 @@
   --heading-color: #002B6E;
   --secondary-heading-color: #002B6E;
   --page-header-color: #002B6E;
+  --subtitle-color: #111111;
   --detail-bg: #f8f9fa;
   --detail-color: #555555;
   --detail-value-color: #002B6E;
@@ -166,6 +167,8 @@ body {
 .vehicle-card .plate { color: var(--cyan); font-weight: 700; font-size: 1.1rem; }
 .vehicle-card .detail { color: var(--detail-color); font-size: 0.9rem; margin: 4px 0; }
 .vehicle-card .actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.section-title { color: var(--subtitle-color); }
 
 /* NFC Public View */
 .nfc-public .info-list { display: flex; flex-direction: column; gap: 3px; }
