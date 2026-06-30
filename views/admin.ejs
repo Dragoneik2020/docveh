@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Panel de Administración</h1>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px;">
+      <div class="card" style="text-align:center;cursor:pointer;" onclick="location.href='/admin/users'">
+        <div class="admin-stat" style="color:var(--admin-primary);"><%= users.length %></div>
+        <div style="color:#888;font-weight:600;">Usuarios</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="admin-stat admin-stat-green"><%= vehicleCount %></div>
+        <div style="color:#888;font-weight:600;">Vehículos</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="admin-stat admin-stat-orange"><%= docCount %></div>
+        <div style="color:#888;font-weight:600;">Documentos</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="admin-stat admin-stat-red"><%= nfcCount %></div>
+        <div style="color:#888;font-weight:600;">Enlaces NFC</div>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer;" onclick="location.href='/admin/logs'">
+        <div class="admin-stat admin-stat-primary"><%= logCount %></div>
+        <div style="color:#888;font-weight:600;">Actividades</div>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer;border:<%= pendingPayments > 0 ? '2px solid #ffc107' : '1px solid #ddd' %>;" onclick="location.href='/admin/payments'">
+        <div style="font-size:2rem;color:#ffc107;"><%= pendingPayments %></div>
+        <div style="color:#888;font-weight:600;">Pagos Pendientes</div>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer;" onclick="location.href='/admin/backups'">
+        <div style="font-size:2rem;color:#6c5ce7;">💾</div>
+        <div style="color:#888;font-weight:600;">Backups</div>
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h3 style="margin:0;">Usuarios Registrados</h3>
+        <p style="color:#888;margin:5px 0 0;">
+          <%= users.length %> usuarios totales · 
+          <%= users.filter(u => u.role === 'admin').length %> admin · 
+          <%= users.filter(u => u.role !== 'admin').length %> usuarios
+        </p>
+      </div>
+      <a href="/admin/users" class="btn btn-primary">Gestionar Usuarios</a>
+    </div>
+  </div>
+</body>
+</html>

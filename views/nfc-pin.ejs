@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso protegido - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body style="background: #1a1a2e;">
+  <div class="pin-container">
+    <div class="card">
+      <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
+      <h2>Documentación Protegida</h2>
+      <p style="color:#888; margin-bottom:25px;">Introduce el PIN para acceder a la documentación del vehículo.</p>
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <form method="GET" action="/nfc/<%= token %>">
+        <div class="form-group">
+          <input type="password" name="pin" placeholder="· · · ·" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" required style="text-align:center; font-size:1.8rem; letter-spacing:10px;">
+        </div>
+        <button type="submit" class="btn btn-primary">Acceder</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

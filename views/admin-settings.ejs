@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración - Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+  <style>
+    .settings-form { max-width: 800px; }
+    .settings-form .form-group textarea { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; font-family: inherit; resize: vertical; min-height: 60px; outline: none; }
+    .settings-form .form-group textarea:focus { border-color: var(--cyan); }
+    .settings-form .form-group input { font-size: 0.95rem; }
+    .settings-group { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .settings-group h4 { color: var(--navy); margin-bottom: 10px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Configuración del Sitio</h1>
+      <a href="/admin" class="btn btn-secondary">← Volver al Panel</a>
+    </div>
+
+    <% if (msg) { %><div class="alert" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb;"><%= msg %></div><% } %>
+
+    <form method="POST" action="/admin/settings" class="settings-form" enctype="multipart/form-data">
+      <div class="card">
+        <h3>General</h3>
+        <div class="settings-group">
+          <div class="form-group">
+            <label>Nombre del sitio</label>
+            <input type="text" name="site_name" value="<%= settings.site_name %>">
+          </div>
+          <div class="form-group">
+            <label>Descripción del sitio (SEO)</label>
+            <textarea name="site_description" rows="2"><%= settings.site_description %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Texto del footer</label>
+            <input type="text" name="footer_text" value="<%= settings.footer_text %>">
+          </div>
+          <div class="form-group">
+            <label>Logo del sitio</label>
+            <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+              <img src="/logo.png?<%= Date.now() %>" alt="Logo actual" style="height:60px;border:1px solid #ddd;border-radius:4px;padding:5px;background:#fff;">
+              <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp" style="padding:8px;border:1px solid #ccc;border-radius:6px;background:#fff;">
+              <span style="font-size:0.8rem;color:#888;">Se reemplazará automáticamente al guardar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Hero (Portada)</h3>
+        <div class="settings-group">
+          <div class="form-group">
+            <label>Título principal (puede incluir HTML, ej: <code>&lt;span&gt;texto&lt;/span&gt;</code>)</label>
+            <textarea name="hero_title" rows="2"><%= settings.hero_title %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Subtítulo</label>
+            <textarea name="hero_subtitle" rows="3"><%= settings.hero_subtitle %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Texto del botón CTA</label>
+            <input type="text" name="hero_cta" value="<%= settings.hero_cta %>">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Características (Features)</h3>
+        <% for (let i = 1; i <= 3; i++) { %>
+        <div class="settings-group">
+          <h4>Característica <%= i %></h4>
+          <div class="form-group">
+            <label>Icono</label>
+            <input type="text" name="feature<%= i %>_icon" value="<%= settings['feature' + i + '_icon'] %>" style="max-width:80px;">
+          </div>
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" name="feature<%= i %>_title" value="<%= settings['feature' + i + '_title'] %>">
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea name="feature<%= i %>_desc" rows="2"><%= settings['feature' + i + '_desc'] %></textarea>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem;margin-bottom:30px;">Guardar Configuración</button>
+    </form>
+  </div>
+</body>
+</html>

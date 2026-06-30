@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions">Suscripciones</a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Pago - <%= plan.name %></h1>
+    </div>
+
+    <% if (msg) { %><div class="alert" style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:12px;border-radius:6px;margin-bottom:15px;"><%= msg %></div><% } %>
+
+    <div class="card" style="max-width:500px;margin:0 auto;">
+      <h3>Resumen del pedido</h3>
+      <div style="margin:20px 0;">
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;">
+          <span>Plan <%= plan.name %></span>
+          <span><strong>$<%= plan.price.toLocaleString('es-CL') %></strong></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;">
+          <span>Vehículos</span><span><%= plan.max_vehicles %></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;">
+          <span>Documentos</span><span><%= plan.max_documents %></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;">
+          <span>Enlaces NFC</span><span><%= plan.max_nfc_links %></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:1.2rem;font-weight:700;">
+          <span>Total</span><span>$<%= plan.price.toLocaleString('es-CL') %></span>
+        </div>
+      </div>
+
+      <% if (pendingPayment && (pendingPayment.status === 'pending' || pendingPayment.status === 'pending_flow')) { %>
+        <div style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:15px;border-radius:6px;text-align:center;">
+          <p style="font-size:1.1rem;margin:0 0 8px;"><strong>Pago pendiente</strong></p>
+          <% if (pendingPayment.status === 'pending_flow') { %>
+            <p style="margin:0 0 5px;">Fuiste redirigido a Flow para completar el pago.</p>
+            <% if (pendingPayment.flow_url) { %>
+              <a href="<%= pendingPayment.flow_url %>" class="btn btn-primary" style="margin-top:10px;">Ir a Flow</a>
+            <% } %>
+          <% } else { %>
+            <p style="margin:0 0 5px;">Referencia: <strong><%= pendingPayment.reference %></strong></p>
+            <p style="margin:0;font-size:0.9rem;">El administrador verificará el pago y activará tu plan.</p>
+          <% } %>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:15px;">
+          <a href="/subscriptions" class="btn btn-secondary" style="flex:1;text-align:center;">Volver a Suscripciones</a>
+          <form method="POST" action="/payment/<%= pendingPayment.id %>/cancel" style="flex:1;" onsubmit="return confirm('¿Cancelar este pago pendiente? Podrás iniciar uno nuevo después.')">
+            <button type="submit" class="btn btn-danger" style="width:100%;">Cancelar Pago</button>
+          </form>
+        </div>
+      <% } else if (flowConfigured) { %>
+        <div style="background:#e9f7ef;color:#155724;border:1px solid #c3e6cb;padding:15px;border-radius:6px;margin-bottom:15px;">
+          <p style="margin:0;font-size:0.9rem;text-align:center;">
+            Serás redirigido a <strong>Flow</strong> para pagar de forma segura con Webpay, tarjeta de crédito, débito o transferencia.
+          </p>
+        </div>
+        <form method="POST" action="/payment/submit/<%= plan.id %>">
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem;">
+            Pagar $<%= plan.price.toLocaleString('es-CL') %> con Flow
+          </button>
+        </form>
+        <a href="/subscriptions" class="btn btn-secondary" style="display:block;text-align:center;margin-top:10px;">Cancelar</a>
+      <% } else { %>
+        <div style="background:#e9f7ef;color:#155724;border:1px solid #c3e6cb;padding:15px;border-radius:6px;margin-bottom:15px;">
+          <p style="margin:0;font-size:0.9rem;text-align:center;">
+            Modo simulación — no se realizará un cobro real.
+          </p>
+        </div>
+        <form method="POST" action="/payment/submit/<%= plan.id %>">
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem;">
+            Pagar $<%= plan.price.toLocaleString('es-CL') %> — Simular Pago
+          </button>
+        </form>
+        <a href="/subscriptions" class="btn btn-secondary" style="display:block;text-align:center;margin-top:10px;">Cancelar</a>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

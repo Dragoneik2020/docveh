@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagos - Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+   <style>
+    .badge-pending { background:#fff3cd;color:#856404;padding:3px 8px;border-radius:10px;font-size:0.8rem;font-weight:600; }
+    .badge-pending-flow { background:#cce5ff;color:#004085;padding:3px 8px;border-radius:10px;font-size:0.8rem;font-weight:600; }
+    .badge-confirmed { background:#d4edda;color:#155724;padding:3px 8px;border-radius:10px;font-size:0.8rem;font-weight:600; }
+    .badge-rejected { background:#f8d7da;color:#721c24;padding:3px 8px;border-radius:10px;font-size:0.8rem;font-weight:600; }
+    .badge-failed { background:#f8d7da;color:#721c24;padding:3px 8px;border-radius:10px;font-size:0.8rem;font-weight:600; }
+  </style>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Gestión de Pagos</h1>
+      <a href="/admin" class="btn btn-secondary">← Volver al Panel</a>
+    </div>
+
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Plan</th>
+            <th>Importe</th>
+            <th>Referencia</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (payments.length === 0) { %>
+            <tr><td colspan="8" style="text-align:center;padding:30px;color:#888;">No hay pagos registrados</td></tr>
+          <% } %>
+          <% payments.forEach(p => { %>
+            <tr>
+              <td><%= p.id %></td>
+              <td><%= p.user_name %></td>
+              <td><%= p.plan_name %></td>
+              <td>$<%= Math.round(p.amount).toLocaleString('es-CL') %></td>
+              <td><%= p.reference %></td>
+              <td>
+                <% if (p.status === 'pending') { %><span class="badge-pending">Pendiente</span><% } %>
+                <% if (p.status === 'pending_flow') { %><span class="badge-pending-flow">Flow Pendiente</span><% } %>
+                <% if (p.status === 'confirmed') { %><span class="badge-confirmed">Confirmado</span><% } %>
+                <% if (p.status === 'rejected') { %><span class="badge-rejected">Rechazado</span><% } %>
+                <% if (p.status === 'failed') { %><span class="badge-failed">Fallido</span><% } %>
+              </td>
+              <td><%= new Date(p.created_at).toLocaleString('es-ES') %></td>
+              <td>
+                <% if (p.status === 'pending') { %>
+                  <form method="POST" action="/admin/payment/<%= p.id %>/confirm" style="display:inline;">
+                    <button class="btn btn-success" style="padding:5px 12px;font-size:0.85rem;">Verificar</button>
+                  </form>
+                  <form method="POST" action="/admin/payment/<%= p.id %>/reject" style="display:inline;">
+                    <button class="btn btn-danger" style="padding:5px 12px;font-size:0.85rem;">Rechazar</button>
+                  </form>
+                <% } %>
+                <form method="POST" action="/admin/payment/<%= p.id %>/delete" style="display:inline;" onsubmit="return confirm('¿Eliminar este registro de pago?')">
+                  <button class="btn btn-danger" style="padding:5px 12px;font-size:0.85rem;">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

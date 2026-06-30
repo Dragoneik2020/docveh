@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= vehicle ? vehicle.plate : 'Documentación' %> - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body style="background: #eef2f7;">
+  <div class="nfc-public">
+    <% if (error) { %>
+      <div class="nfc-header">
+        <h1>Documentación no disponible</h1>
+      </div>
+      <div class="nfc-body" style="text-align:center; padding:60px;">
+        <div style="font-size:4rem; margin-bottom:20px;">⚠️</div>
+        <p style="color:#888; font-size:1.1rem;"><%= error %></p>
+      </div>
+    <% } else { %>
+      <div class="nfc-header">
+        <div style="display:flex;align-items:center;gap:30px;flex-wrap:wrap;">
+          <img src="/logo.png" alt="DocVeh" style="height:240px;flex-shrink:0;">
+          <div style="text-align:center;">
+            <h1 style="margin:0 0 8px; font-size:2.2rem;"><%= vehicle.brand %> <%= vehicle.model %></h1>
+            <div class="plate-badge" style="display:inline-block;font-size:1.3rem;padding:8px 20px;"><%= vehicle.plate %></div>
+          </div>
+        </div>
+      </div>
+      <div class="nfc-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div class="card" style="background: #f8f9fa;">
+          <h3 style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--cyan); color:#1a1a2e;">🔧 Ficha Técnica</h3>
+          <div class="info-list">
+            <div class="info-row"><label>Marca</label><span><%= vehicle.brand %></span></div>
+            <div class="info-row"><label>Modelo</label><span><%= vehicle.model %></span></div>
+            <div class="info-row"><label>Año</label><span><%= vehicle.year %></span></div>
+            <div class="info-row"><label>Matrícula</label><span style="font-weight:700;color:#4cc9f0;"><%= vehicle.plate %></span></div>
+            <% if (vehicle.vin) { %><div class="info-row"><label>VIN</label><span style="font-family:monospace;font-size:0.85rem;"><%= vehicle.vin %></span></div><% } %>
+            <% if (vehicle.color) { %><div class="info-row"><label>Color</label><span><%= vehicle.color %></span></div><% } %>
+            <% if (vehicle.fuel_type) { %><div class="info-row"><label>Combustible</label><span><%= vehicle.fuel_type %></span></div><% } %>
+            <% if (vehicle.engine_capacity) { %><div class="info-row"><label>Cilindrada</label><span><%= vehicle.engine_capacity %></span></div><% } %>
+          </div>
+        </div>
+
+        <% if (vehicle.owner_name) { %>
+        <div class="card" style="background: #f8f9fa;">
+          <h3 style="margin:0 0 15px; padding-bottom:10px; border-bottom:2px solid var(--warning); color:#1a1a2e;">👤 Propietario</h3>
+          <div class="info-list">
+            <div class="info-row"><label>Nombre</label><span><%= vehicle.owner_name %></span></div>
+            <% if (vehicle.owner_dni) { %><div class="info-row"><label>DNI / NIF</label><span><%= vehicle.owner_dni %></span></div><% } %>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <h3 style="margin-bottom:20px; color:#1a1a2e;">📄 Documentación del Vehículo</h3>
+
+        <% if (documents.length === 0) { %>
+          <div class="empty-state" style="padding:20px;">
+            <p>No hay documentos disponibles para este vehículo.</p>
+          </div>
+        <% } else { %>
+          <% documents.forEach(d => { %>
+            <div class="nfc-doc">
+              <div>
+                <div style="font-weight:600; font-size:1.1rem; color:#1a1a2e;"><%= d.type %></div>
+                <div style="color:#888; font-size:0.85rem; margin-top:4px;">
+                  <span class="doc-status-badge <%= d.status.class %>"><%= d.status.label %></span>
+                  <% if (d.expiration_date) { %><span style="margin-left:8px;">Vence: <%= new Date(d.expiration_date).toLocaleDateString('es-ES') %></span><% } %>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <% if (d.filename && d.filename.match(/\.(jpg|jpeg|png|webp)$/i)) { %>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" class="btn btn-primary btn-small">Ver Imagen</a>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" style="display:inline-block;width:50px;height:50px;border-radius:6px;overflow:hidden;border:2px solid #e0e0e0;">
+                    <img src="/uploads/<%= userId %>/<%= d.filename %>" alt="<%= d.type %>" style="width:100%;height:100%;object-fit:cover;">
+                  </a>
+                <% } else { %>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+
+        <div style="text-align:center; margin-top:30px; padding-top:20px; border-top:1px solid #eee; color:#aaa; font-size:0.8rem;">
+          Documentación proporcionada por <strong style="color:#4cc9f0;"><img src="/logo.png" alt="DocVeh" style="height:20px;vertical-align:middle;"></strong>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

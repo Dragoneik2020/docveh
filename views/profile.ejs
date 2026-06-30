@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= user.name %></span>
+        <a href="/profile" style="color:#4cc9f0;font-weight:600;">Mi Perfil</a>
+        <a href="/subscriptions"><%= user.plan_name || 'Plan Gratuito' %></a>
+        <% if (user.role === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="auth-container" style="max-width:550px;">
+    <h2>Mi Perfil</h2>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <% if (success) { %><div class="alert" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb;"><%= success %></div><% } %>
+
+    <div style="text-align:center;margin-bottom:25px;">
+      <label for="avatarInput" style="cursor:pointer;display:inline-block;position:relative;">
+        <% if (user.avatar) { %>
+          <img src="<%= user.avatar %>?t=<%= Date.now() %>" id="avatarPreview" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #4cc9f0;">
+        <% } else { %>
+          <div id="avatarPlaceholder" style="width:80px;height:80px;border-radius:50%;background:#4cc9f0;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;"><%= user.name.charAt(0).toUpperCase() %></div>
+          <img src="" id="avatarPreview" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #4cc9f0;display:none;">
+        <% } %>
+        <span style="position:absolute;bottom:-2px;right:-2px;background:#0085CA;color:#fff;border-radius:50%;width:24px;height:24px;font-size:14px;line-height:24px;border:2px solid #fff;">📷</span>
+      </label>
+      <div style="margin-top:8px;font-size:0.9rem;color:#888;">Plan: <strong style="color:#4cc9f0;"><%= user.plan_name %></strong></div>
+    </div>
+
+    <form method="POST" action="/profile" enctype="multipart/form-data">
+      <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="previewAvatar(event)">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" name="name" value="<%= user.name %>">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" value="<%= user.email %>">
+      </div>
+      <hr style="margin:25px 0;border:none;border-top:1px solid #eee;">
+      <p style="color:#888;font-size:0.85rem;margin-bottom:15px;">Deja en blanco si no quieres cambiar la contraseña.</p>
+      <div class="form-group">
+        <label>Contraseña actual</label>
+        <input type="password" name="currentPassword" placeholder="Solo si vas a cambiar la contraseña">
+      </div>
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" name="newPassword" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="form-group">
+        <label>Confirmar nueva contraseña</label>
+        <input type="password" name="confirmPassword" placeholder="Repite la nueva contraseña">
+      </div>
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+
+    <!-- Actividad reciente -->
+    <div style="margin-top:30px;">
+      <h4 style="margin-bottom:15px;color:#1a1a2e;">📋 Actividad Reciente</h4>
+      <% if (recentLogs.length === 0) { %>
+        <p style="color:#888;font-size:0.9rem;">Sin actividad registrada</p>
+      <% } else { %>
+        <% recentLogs.forEach(l => { %>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;">
+            <div>
+              <span style="background:<%= l.action.startsWith('VEHICLE') ? '#e8f4fd' : l.action.startsWith('DOCUMENT') ? '#fef3e2' : l.action.startsWith('NFC') ? '#e8f8e8' : '#f0f0f0' %>;padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;"><%= l.action %></span>
+              <span style="margin-left:6px;color:#555;"><%= l.description %></span>
+            </div>
+            <span style="color:#aaa;font-size:0.75rem;white-space:nowrap;"><%= l.created_at %></span>
+          </div>
+        <% }); %>
+        <div style="text-align:center;margin-top:10px;"><a href="/activity-log" style="color:#4cc9f0;font-size:0.85rem;">Ver toda la actividad →</a></div>
+      <% } %>
+    </div>
+  </div>
+  <script>
+    function previewAvatar(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = document.getElementById('avatarPreview');
+        const ph = document.getElementById('avatarPlaceholder');
+        img.src = ev.target.result;
+        img.style.display = 'inline-block';
+        if (ph) ph.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>

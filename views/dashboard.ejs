@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard" style="color:#4cc9f0;font-weight:600;">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <div>
+        <h1>Mis Vehículos</h1>
+        <p style="color:#888;margin-top:5px;"><%= vehicleCount %> vehículo(s) registrados · Plan <%= planName || 'Gratuito' %></p>
+      </div>
+      <a href="/new-vehicle" class="btn btn-primary">+ Añadir Vehículo</a>
+    </div>
+
+    <% if (planExpiration) { %>
+      <div class="card" style="border-left:4px solid var(--cyan);margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <strong style="font-size:1.1rem;">Plan <%= planName %></strong>
+          <span style="color:#888;margin-left:10px;">⏱ <strong id="countdown"></strong></span>
+        </div>
+      </div>
+      <script>
+        (function() {
+          var end = new Date('<%= planExpiresAt %>').getTime();
+          function update() {
+            var now = new Date().getTime();
+            var diff = end - now;
+            if (diff <= 0) { document.getElementById('countdown').innerHTML = 'Vencido'; return; }
+            var days = Math.floor(diff / (1000*60*60*24));
+            var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            var minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+            document.getElementById('countdown').innerHTML = days + 'd ' + hours + 'h ' + minutes + 'm restantes';
+          }
+          update();
+          setInterval(update, 60000);
+        })();
+      </script>
+    <% } else if (subExpired) { %>
+      <div class="card" style="border-left:4px solid #e74c3c;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <strong style="font-size:1.1rem;color:#e74c3c;">Plan <%= subPlanName %> — Vencido</strong>
+          <span style="color:#888;margin-left:10px;">Suscríbete nuevamente para reactivar tu plan</span>
+        </div>
+        <a href="/subscriptions" class="btn btn-primary btn-small">Renovar</a>
+      </div>
+    <% } else { %>
+      <div class="card" style="border-left:4px solid #aaa;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <strong style="font-size:1.1rem;">Plan <%= planName %></strong>
+          <% if (planPrice === 0) { %><span style="color:#888;margin-left:10px;">Sin fecha de expiración</span><% } %>
+        </div>
+        <a href="/subscriptions" class="btn btn-primary btn-small"><%= planPrice === 0 ? 'Mejorar Plan' : 'Renovar' %></a>
+      </div>
+    <% } %>
+
+    <!-- Alertas globales -->
+    <% if (alerts.length > 0) { %>
+      <div class="alerts-section">
+        <% 
+          const expiredAlerts = alerts.filter(a => a.status.class === 'doc-status-expired');
+          const warningAlerts = alerts.filter(a => a.status.class === 'doc-status-warning');
+        %>
+        <% if (expiredAlerts.length > 0) { %>
+          <div class="card" style="border-left:4px solid #e74c3c;margin-bottom:15px;">
+            <h3 style="color:#e74c3c;font-size:1rem;">🔴 Documentos Vencidos (<%= expiredAlerts.length %>)</h3>
+            <% expiredAlerts.slice(0, 5).forEach(a => { %>
+              <div style="font-size:0.85rem;padding:4px 0;color:#c0392b;">
+                <strong><%= a.vehicle.plate %></strong> — <%= a.docType %>: <%= a.status.label %>
+              </div>
+            <% }); %>
+            <% if (expiredAlerts.length > 5) { %><div style="font-size:0.85rem;color:#888;">... y <%= expiredAlerts.length - 5 %> más</div><% } %>
+          </div>
+        <% } %>
+        <% if (warningAlerts.length > 0) { %>
+          <div class="card" style="border-left:4px solid #f39c12;margin-bottom:15px;">
+            <h3 style="color:#f39c12;font-size:1rem;">⚠️ Documentos Próximos a Vencer (<%= warningAlerts.length %>)</h3>
+            <% warningAlerts.slice(0, 5).forEach(a => { %>
+              <div style="font-size:0.85rem;padding:4px 0;color:#856404;">
+                <strong><%= a.vehicle.plate %></strong> — <%= a.docType %>: <%= a.status.label %>
+              </div>
+            <% }); %>
+            <% if (warningAlerts.length > 5) { %><div style="font-size:0.85rem;color:#888;">... y <%= warningAlerts.length - 5 %> más</div><% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+
+    <% if (vehicles.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">🚗</div>
+        <h3>No tienes vehículos registrados</h3>
+        <p>Añade tu primer vehículo para comenzar a gestionar su documentación.</p>
+        <a href="/new-vehicle" class="btn btn-primary" style="margin-top: 20px;">Añadir Vehículo</a>
+      </div>
+    <% } else { %>
+      <div class="vehicle-grid">
+        <% vehicles.forEach(v => { %>
+          <div class="vehicle-card">
+            <h3><%= v.brand %> <%= v.model %></h3>
+            <div class="plate"><%= v.plate %></div>
+            <div class="detail">📅 <%= v.year %></div>
+            <% if (v.vin) { %><div class="detail" style="font-family:monospace;font-size:0.8rem;">VIN: <%= v.vin %></div><% } %>
+            <% if (v.owner_name) { %><div class="detail">👤 <%= v.owner_name %></div><% } %>
+            <div class="actions">
+              <a href="/vehicle/<%= v.id %>" class="btn btn-primary btn-small">Gestionar</a>
+              <form method="POST" action="/vehicle/<%= v.id %>/delete" style="display:inline;" onsubmit="return confirm('¿Eliminar este vehículo y todos sus documentos?')">
+                <button type="submit" class="btn btn-danger btn-small">Eliminar</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

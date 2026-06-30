@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Añadir Vehículo - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle" style="color:#4cc9f0;font-weight:600;">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="auth-container" style="max-width:600px;">
+    <h2>Añadir Vehículo</h2>
+    <% if (error) { %><div class="alert alert-error"><%- error %></div><% } %>
+
+    <form method="POST" action="/new-vehicle">
+      <h4 style="color:#1a1a2e;margin-bottom:15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🔑 Identificación</h4>
+      <div class="form-group">
+        <label>Matrícula *</label>
+        <input type="text" name="plate" required placeholder="Ej: 1234ABC">
+      </div>
+      <div class="form-group">
+        <label>Número VIN</label>
+        <input type="text" name="vin" placeholder="17 caracteres (ej: WBA3A5C5XDF123456)">
+      </div>
+
+      <h4 style="color:#1a1a2e;margin:20px 0 15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🚗 Datos del Vehículo</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 15px;">
+        <div class="form-group">
+          <label>Marca *</label>
+          <input type="text" name="brand" required placeholder="Ej: Toyota">
+        </div>
+        <div class="form-group">
+          <label>Modelo *</label>
+          <input type="text" name="model" required placeholder="Ej: Corolla">
+        </div>
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="text" name="year" required placeholder="Ej: 2020">
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <input type="text" name="color" placeholder="Ej: Blanco, Azul...">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Combustible</label>
+          <select name="fuel_type" style="width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem;">
+            <option value="">Seleccionar...</option>
+            <option value="gasolina">Gasolina</option>
+            <option value="diesel">Diésel</option>
+            <option value="hibrido">Híbrido</option>
+            <option value="electrico">Eléctrico</option>
+            <option value="glp">GLP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cilindrada</label>
+          <input type="text" name="engine_capacity" placeholder="Ej: 1.6, 2.0">
+        </div>
+      </div>
+
+      <h4 style="color:#1a1a2e;margin:20px 0 15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">👤 Propietario</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 15px;">
+        <div class="form-group">
+          <label>Nombre del Propietario</label>
+          <input type="text" name="owner_name" placeholder="Nombre completo">
+        </div>
+        <div class="form-group">
+          <label>DNI / NIF</label>
+          <input type="text" name="owner_dni" placeholder="12345678A">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:10px;">Guardar Vehículo</button>
+    </form>
+  </div>
+</body>
+</html>

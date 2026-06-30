@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultado del Pago - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions">Suscripciones</a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card" style="max-width:500px;margin:80px auto;text-align:center;">
+      <% if (success) { %>
+        <div style="font-size:3rem;margin-bottom:15px;">✅</div>
+        <h2 style="color:#155724;">Pago Exitoso</h2>
+        <p style="color:#666;margin:15px 0;"><%= message %></p>
+        <a href="/subscriptions" class="btn btn-primary">Ir a Mis Suscripciones</a>
+      <% } else { %>
+        <div style="font-size:3rem;margin-bottom:15px;">⏳</div>
+        <h2 style="color:#856404;"><%= message && message.includes('pendiente') ? 'Pago Pendiente' : 'Pago No Procesado' %></h2>
+        <p style="color:#666;margin:15px 0;"><%= message %></p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <a href="/subscriptions" class="btn btn-primary">Ir a Suscripciones</a>
+          <a href="/dashboard" class="btn btn-secondary">Volver al Dashboard</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

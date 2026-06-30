@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <a href="/register">Registrarse</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <h2>Iniciar Sesión</h2>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" required placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" name="password" required placeholder="Tu contraseña">
+      </div>
+      <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+    </form>
+
+    <% if (googleClientId && googleClientId !== 'your-google-client-id') { %>
+      <div style="text-align:center;margin:15px 0;color:#888;">— o —</div>
+      <a href="/auth/google" class="btn btn-secondary" style="width:100%;text-align:center;">Iniciar con Google</a>
+    <% } %>
+
+    <div class="auth-link">¿No tienes cuenta? <a href="/register">Regístrate</a></div>
+  </div>
+</body>
+</html>

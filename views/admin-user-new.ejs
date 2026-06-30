@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Usuario - Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin �-_</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">ConfiguraciA3n</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">dY"< Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ AA�adir VehA-culo</a>
+        <a href="/logout">Cerrar SesiA3n</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Crear Nuevo Usuario</h1>
+      <a href="/admin/users" class="btn btn-secondary">�+? Volver a Usuarios</a>
+    </div>
+
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+    <div class="card" style="max-width:500px;">
+      <form method="POST" action="/admin/user/new">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label>ContraseA�a</label>
+          <input type="password" name="password" required minlength="6">
+          <small style="color:#888;">MA-nimo 6 caracteres</small>
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select name="role">
+            <option value="user">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+<div class="form-group">
+          <label>Plan</label>
+          <select name="plan_id" id="planSelect">
+            <% plans.forEach(p => { %>
+              <option value="<%= p.id %>" <%= p.id === 1 ? 'selected' : '' %> data-price="<%= p.price %>">
+                <%= p.name %> — <%= p.price === 0 ? 'Gratis' : '$' + p.price.toLocaleString('es-CL') %> | <%= p.max_vehicles %> veh, <%= p.max_documents %> docs, <%= p.max_nfc_links %> NFC
+              </option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group" id="durationGroup" style="display:none;">
+          <label>Duración de la suscripción (meses)</label>
+          <input type="number" name="duration_months" id="durationInput" min="1" max="120" value="12" placeholder="12">
+          <small style="color:#888;">Solo para planes de pago. 12 = 1 año.</small>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary">Crear Usuario</button>
+          <a href="/admin/users" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    const planSelect = document.getElementById('planSelect');
+    const durationGroup = document.getElementById('durationGroup');
+    function toggleDuration() {
+      const selected = planSelect.options[planSelect.selectedIndex];
+      const price = parseInt(selected.dataset.price || '0');
+      durationGroup.style.display = price > 0 ? 'block' : 'none';
+    }
+    planSelect.addEventListener('change', toggleDuration);
+    toggleDuration();
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= vehicle.brand %> <%= vehicle.model %> - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/vehicle/<%= vehicle.id %>" style="color:#4cc9f0;font-weight:600;"><%= vehicle.plate %></a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container vehicle-detail">
+    <div class="header">
+      <div>
+        <h1><%= vehicle.brand %> <%= vehicle.model %></h1>
+        <span style="color:#888;font-size:0.9rem;"><%= vehicle.plate %></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <a href="/vehicle/<%= vehicle.id %>/edit" class="btn btn-secondary">Editar Vehículo</a>
+        <form method="POST" action="/vehicle/<%= vehicle.id %>/delete" onsubmit="return confirm('¿Eliminar este vehículo y todos sus documentos?')">
+          <button type="submit" class="btn btn-danger">Eliminar Vehículo</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Alertas de vencimiento -->
+    <% if (expired.length > 0 || expiring.length > 0) { %>
+      <div class="card" style="border-left:4px solid <%= expired.length > 0 ? '#e74c3c' : '#f39c12' %>;">
+        <h3 style="color:<%= expired.length > 0 ? '#e74c3c' : '#f39c12' %>;">
+          <%= expired.length > 0 ? '⚠️ Documentos Vencidos' : '⚠️ Documentos Próximos a Vencer' %>
+        </h3>
+        <% expired.forEach(d => { %>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fde8e8;color:#c0392b;">
+            <span>📄 <strong><%= d.type %></strong> — <%= d.original_name %></span>
+            <span><%= d.status.label %></span>
+          </div>
+        <% }); %>
+        <% expiring.forEach(d => { %>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fff3cd;color:#856404;">
+            <span>📄 <strong><%= d.type %></strong> — <%= d.original_name %></span>
+            <span><%= d.status.label %></span>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="alert alert-error">
+        <%- error %>
+        <% if (error.includes('Mejora tu plan')) { %>
+          <a href="/subscriptions" class="btn btn-primary btn-small" style="margin-left:10px;">Ver Planes</a>
+        <% } %>
+      </div>
+    <% } %>
+
+    <!-- Ficha Técnica -->
+    <div class="card">
+      <h3>🔧 Ficha Técnica</h3>
+      <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+        <div class="info-item"><label>Marca</label><span><%= vehicle.brand %></span></div>
+        <div class="info-item"><label>Modelo</label><span><%= vehicle.model %></span></div>
+        <div class="info-item"><label>Año</label><span><%= vehicle.year %></span></div>
+        <div class="info-item"><label>Matrícula</label><span style="font-weight:700;color:#4cc9f0;"><%= vehicle.plate %></span></div>
+        <% if (vehicle.vin) { %><div class="info-item"><label>VIN</label><span style="font-family:monospace;font-size:0.85rem;"><%= vehicle.vin %></span></div><% } %>
+        <% if (vehicle.color) { %><div class="info-item"><label>Color</label><span><%= vehicle.color %></span></div><% } %>
+        <% if (vehicle.fuel_type) { %><div class="info-item"><label>Combustible</label><span><%= vehicle.fuel_type %></span></div><% } %>
+        <% if (vehicle.engine_capacity) { %><div class="info-item"><label>Cilindrada</label><span><%= vehicle.engine_capacity %></span></div><% } %>
+      </div>
+    </div>
+
+    <!-- Propietario -->
+    <% if (vehicle.owner_name) { %>
+      <div class="card">
+        <h3>👤 Propietario</h3>
+        <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+          <div class="info-item"><label>Nombre</label><span><%= vehicle.owner_name %></span></div>
+          <% if (vehicle.owner_dni) { %><div class="info-item"><label>DNI / NIF</label><span><%= vehicle.owner_dni %></span></div><% } %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Documentos con Estado de Vigencia -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h3 style="margin-bottom:0;">📄 Documentos</h3>
+        <span style="font-size:0.85rem;color:#888;">Plan <%= plan?.name || 'Gratuito' %> · <strong><%= plan?.max_documents || 10 %></strong> máx</span>
+      </div>
+
+      <form method="POST" action="/vehicle/<%= vehicle.id %>/upload" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()" id="uploadArea">
+          <p style="font-size: 2rem; margin-bottom: 5px;">📎</p>
+          <p><strong>Seleccionar Archivo</strong></p>
+          <p style="font-size:0.75rem;color:#aaa;margin-top:2px;">PDF, JPEG, PNG</p>
+          <input type="file" id="fileInput" name="document" accept=".pdf,application/pdf,image/jpeg,image/png,image/webp" style="display:none;" capture="environment" onchange="document.getElementById('fileStatus').textContent = this.files[0]?.name ? '📄 ' + this.files[0].name : ''; document.getElementById('fileStatus').style.display = this.files[0]?.name ? 'block' : 'none';">
+          <p id="fileStatus" style="font-size:0.85rem;color:#4cc9f0;margin-top:5px;display:none;"></p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:130px; margin-bottom:0;">
+            <select name="type" style="width:100%; padding:10px; border:2px solid #e0e0e0; border-radius:8px;">
+              <option value="seguro">Seguro</option>
+              <option value="itv">ITV</option>
+              <option value="matriculacion">Matriculación</option>
+              <option value="permiso">Permiso de Circulación</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px; margin-bottom:0;">
+            <input type="date" name="expiration_date" style="width:100%; padding:10px; border:2px solid #e0e0e0; border-radius:8px;">
+          </div>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Subir</button>
+        </div>
+        <p style="color:#888;font-size:0.8rem;margin-top:5px;">Selecciona la fecha de vencimiento del documento para recibir alertas.</p>
+      </form>
+
+      <div class="doc-list" style="margin-top:20px;">
+        <% if (documents.length === 0) { %>
+          <div class="empty-state" style="padding:20px;">
+            <p>No hay documentos subidos</p>
+          </div>
+        <% } else { %>
+          <% documents.forEach(d => { %>
+            <div class="doc-item">
+              <div class="doc-info">
+                <% if (d.filename.match(/\.(jpg|jpeg|png|webp)$/i)) { %>
+                  <span class="doc-icon">🖼️</span>
+                <% } else { %>
+                  <span class="doc-icon">📄</span>
+                <% } %>
+                <div>
+                  <div class="doc-name"><%= d.original_name %></div>
+                  <div class="doc-date"><%= d.uploaded_at %></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;flex-wrap:wrap;">
+                <span class="doc-type"><%= d.type %></span>
+                <span class="doc-status-badge <%= d.status.class %>"><%= d.status.label %></span>
+                <% if (d.filename.match(/\.(jpg|jpeg|png|webp)$/i)) { %>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" class="btn btn-primary btn-small">Ver Imagen</a>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" style="display:inline-block;width:50px;height:50px;border-radius:6px;overflow:hidden;border:2px solid #e0e0e0;">
+                    <img src="/uploads/<%= userId %>/<%= d.filename %>" alt="<%= d.original_name %>" style="width:100%;height:100%;object-fit:cover;">
+                  </a>
+                <% } else { %>
+                  <a href="/uploads/<%= userId %>/<%= d.filename %>" target="_blank" class="btn btn-primary btn-small">Ver PDF</a>
+                <% } %>
+                <form method="POST" action="/document/<%= d.id %>/delete" style="display:inline;" onsubmit="return confirm('¿Eliminar este documento?')">
+                  <button type="submit" class="btn btn-danger btn-small">✕</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Enlaces NFC -->
+    <div class="card">
+      <% if (plan?.has_nfc) { %>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h3 style="margin-bottom:0;">📱 Enlaces NFC</h3>
+        <span style="font-size:0.85rem;color:#888;">Máx <%= plan?.max_nfc_links || 2 %> enlaces</span>
+      </div>
+      <p style="color:#888; margin-bottom:15px; font-size:0.9rem;">Genera enlaces únicos para escribir en etiquetas NFC. Cada toque abrirá los documentos del vehículo.</p>
+
+      <form method="POST" action="/vehicle/<%= vehicle.id %>/nfc-generate" style="display:flex; gap:10px; align-items:flex-end; margin-bottom:20px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:150px; margin-bottom:0;">
+          <label>PIN de protección<%= plan?.has_pin_protection ? '' : ' (solo Básico/Premium)' %></label>
+          <input type="text" name="pin" placeholder="4 dígitos" maxlength="4" pattern="[0-9]{0,4}" <%= plan?.has_pin_protection ? '' : 'disabled title="Disponible en plan Básico o Premium"' %>>
+        </div>
+        <button type="submit" class="btn btn-success">Generar Enlace NFC</button>
+      </form>
+
+      <% if (nfcLinks.length === 0) { %>
+        <div class="empty-state" style="padding:20px;">
+          <p>No hay enlaces NFC generados</p>
+        </div>
+      <% } else { %>
+        <% nfcLinks.forEach(l => { %>
+          <div class="nfc-link-item">
+            <div>
+              <div class="nfc-url"><%= baseUrl %>/nfc/<%= l.token %></div>
+              <div style="margin-top:5px;">
+                <span class="nfc-status <%= l.active ? 'active' : 'inactive' %>"><%= l.active ? 'Activo' : 'Inactivo' %></span>
+                <% if (l.pin) { %><span class="nfc-pin-badge">🔒 PIN protegido</span><% } %>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; flex-shrink:0;">
+              <a href="/nfc/<%= l.token %>" target="_blank" class="btn btn-primary btn-small">Vista</a>
+              <form method="POST" action="/nfc/<%= l.id %>/toggle" style="display:inline;">
+                <button type="submit" class="btn btn-warning btn-small"><%= l.active ? 'Desactivar' : 'Activar' %></button>
+              </form>
+              <form method="POST" action="/nfc/<%= l.id %>/delete" style="display:inline;" onsubmit="return confirm('¿Eliminar este enlace NFC?')">
+                <button type="submit" class="btn btn-danger btn-small">✕</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+      <% } else { %>
+        <div class="empty-state" style="padding:20px;text-align:center;">
+          <p style="font-size:1.1rem;margin-bottom:10px;">📱 Enlaces NFC no disponibles</p>
+          <p style="color:#888;">Tu plan no incluye enlaces NFC. <a href="/subscriptions" style="color:var(--cyan);font-weight:600;">Mejora tu plan</a> para activar esta funcionalidad.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Actividad reciente -->
+    <div class="card">
+      <h3>📋 Actividad Reciente</h3>
+      <% if (recentLogs.length === 0) { %>
+        <div class="empty-state" style="padding:15px;"><p style="font-size:0.9rem;">Sin actividad registrada</p></div>
+      <% } else { %>
+        <div style="max-height:250px;overflow-y:auto;">
+          <% recentLogs.forEach(l => { %>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:0.85rem;">
+              <div>
+                <span style="background:<%= l.action.startsWith('VEHICLE') ? '#e8f4fd' : l.action.startsWith('DOCUMENT') ? '#fef3e2' : l.action.startsWith('NFC') ? '#e8f8e8' : '#f0f0f0' %>;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;"><%= l.action %></span>
+                <span style="margin-left:8px;color:#555;"><%= l.description %></span>
+              </div>
+              <span style="color:#aaa;font-size:0.75rem;white-space:nowrap;margin-left:10px;"><%= l.created_at %></span>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

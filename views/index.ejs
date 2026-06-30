@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= siteSettings.site_name %> - Documentación Vehicular NFC</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><img src="/logo.png" alt="<%= siteSettings.site_name %>" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <a href="/login">Iniciar Sesión</a>
+        <a href="/register" class="btn btn-primary btn-small">Registrarse</a>
+      </nav>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1><%- siteSettings.hero_title %></h1>
+    <p><%= siteSettings.hero_subtitle %></p>
+    <a href="/register" class="btn btn-primary"><%= siteSettings.hero_cta %></a>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon"><%= siteSettings.feature1_icon %></div>
+        <h3><%= siteSettings.feature1_title %></h3>
+        <p><%= siteSettings.feature1_desc %></p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><%= siteSettings.feature2_icon %></div>
+        <h3><%= siteSettings.feature2_title %></h3>
+        <p><%= siteSettings.feature2_desc %></p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon"><%= siteSettings.feature3_icon %></div>
+        <h3><%= siteSettings.feature3_title %></h3>
+        <p><%= siteSettings.feature3_desc %></p>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:80px 20px;background:#fff;text-align:center;">
+    <div class="container">
+      <h2 style="font-size:2rem;color:#1a1a2e;margin-bottom:50px;"><%= siteSettings.plans_title %></h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;max-width:900px;margin:0 auto;">
+        <% plans.forEach(function(p, i) { %>
+          <div style="background:<%= i === 1 ? '#1a1a2e' : '#f8f9fa' %>;border-radius:16px;padding:35px 25px;<%= i === 1 ? 'color:#fff;transform:scale(1.05);' : '' %>">
+            <h3 style="font-size:1.5rem;<%= i === 1 ? '' : '' %>"><%= p.name %></h3>
+            <div style="font-size:2.5rem;font-weight:700;<%= i === 1 ? 'color:#4cc9f0;' : 'color:#1a1a2e;' %>margin:15px 0;"><%= p.price === 0 ? 'Gratis' : '$' + p.price.toLocaleString('es-CL') %><% if (p.price > 0) { %><span style="font-size:1rem;color:<%= i === 1 ? '#aaa' : '#888' %>;">/año</span><% } %></div>
+            <ul style="list-style:none;padding:0;margin:20px 0;color:<%= i === 1 ? '#ccc' : '#555' %>;">
+              <li style="padding:6px 0;">🚗 <%= p.max_vehicles %> vehículo<%= p.max_vehicles !== 1 ? 's' : '' %></li>
+              <li style="padding:6px 0;">📄 <%= p.max_documents %> documento<%= p.max_documents !== 1 ? 's' : '' %></li>
+              <li style="padding:6px 0;">📱 <%= p.max_nfc_links %> enlace<%= p.max_nfc_links !== 1 ? 's' : '' %> NFC</li>
+              <% if (p.has_pin_protection) { %><li style="padding:6px 0;">🔒 PIN protección</li><% } %>
+              <li style="padding:6px 0;">📎 <%= p.max_file_size %> MB por PDF</li>
+            </ul>
+            <a href="/register" class="btn <%= i === 1 ? 'btn-primary' : 'btn-secondary' %>"><%= p.price === 0 ? 'Empezar Gratis' : 'Elegir ' + p.name %></a>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

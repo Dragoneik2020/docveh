@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colores - Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+  <style>
+    .colors-form { max-width: 800px; }
+    .colors-form .form-group input[type="color"] { height: 50px; padding: 4px; cursor: pointer; width: 100%; border: 2px solid var(--card-border); border-radius: 8px; background: var(--card-bg); }
+    .colors-form .form-group input[type="color"]:focus { border-color: var(--cyan); outline: none; }
+    .color-group { background: color-mix(in srgb, var(--card-bg) 98%, #000); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .color-group h4 { color: var(--navy); margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    @media (max-width: 600px) { .color-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Colores del Sitio</h1>
+      <a href="/admin" class="btn btn-secondary">← Volver al Panel</a>
+    </div>
+
+    <% if (msg) { %><div class="alert" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb;"><%= msg %></div><% } %>
+
+    <form method="POST" action="/admin/colors" class="colors-form">
+      <div class="card">
+        <h3>Colores Generales</h3>
+        <div class="color-group">
+          <div class="color-grid">
+            <div class="form-group">
+              <label>Color primario (botones, acentos)</label>
+              <input type="color" name="primary_color" value="<%= settings.primary_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.primary_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color secundario (navbar, títulos)</label>
+              <input type="color" name="navy_color" value="<%= settings.navy_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.navy_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color de texto general</label>
+              <input type="color" name="text_color" value="<%= settings.text_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.text_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color de títulos</label>
+              <input type="color" name="heading_color" value="<%= settings.heading_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.heading_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color de enlaces</label>
+              <input type="color" name="link_color" value="<%= settings.link_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.link_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color texto navbar</label>
+              <input type="color" name="navbar_text_color" value="<%= settings.navbar_text_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.navbar_text_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Color texto botones</label>
+              <input type="color" name="button_text_color" value="<%= settings.button_text_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.button_text_color %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Fondo y Tarjetas</h3>
+        <div class="color-group">
+          <div class="color-grid">
+            <div class="form-group">
+              <label>Fondo del sitio</label>
+              <input type="color" name="body_bg" value="<%= settings.body_bg %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.body_bg %></span>
+            </div>
+            <div class="form-group">
+              <label>Fondo de tarjetas (cards)</label>
+              <input type="color" name="card_bg" value="<%= settings.card_bg %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.card_bg %></span>
+            </div>
+            <div class="form-group">
+              <label>Borde de tarjetas</label>
+              <input type="color" name="card_border" value="<%= settings.card_border %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.card_border %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Colores de Estado</h3>
+        <div class="color-group">
+          <div class="color-grid">
+            <div class="form-group">
+              <label>Éxito / Vigente</label>
+              <input type="color" name="success_color" value="<%= settings.success_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.success_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Advertencia / Próximo a vencer</label>
+              <input type="color" name="warning_color" value="<%= settings.warning_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.warning_color %></span>
+            </div>
+            <div class="form-group">
+              <label>Peligro / Vencido</label>
+              <input type="color" name="danger_color" value="<%= settings.danger_color %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.danger_color %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Panel de Administración</h3>
+        <div class="color-group">
+          <div class="color-grid">
+            <div class="form-group">
+              <label>Color primario admin (botones, acentos)</label>
+              <input type="color" name="admin_primary_color" value="<%= settings.admin_primary_color || '#6c5ce7' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.admin_primary_color || '#6c5ce7' %></span>
+            </div>
+            <div class="form-group">
+              <label>Fondo navbar admin</label>
+              <input type="color" name="admin_navbar_bg" value="<%= settings.admin_navbar_bg || '#2d2d2d' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.admin_navbar_bg || '#2d2d2d' %></span>
+            </div>
+            <div class="form-group">
+              <label>Fondo badge ADMIN</label>
+              <input type="color" name="admin_badge_bg" value="<%= settings.admin_badge_bg || '#6c5ce7' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.admin_badge_bg || '#6c5ce7' %></span>
+            </div>
+            <div class="form-group">
+              <label>Texto badge ADMIN</label>
+              <input type="color" name="admin_badge_text" value="<%= settings.admin_badge_text || '#ffffff' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.admin_badge_text || '#ffffff' %></span>
+            </div>
+            <div class="form-group">
+              <label>Color acento cards admin</label>
+              <input type="color" name="admin_card_accent" value="<%= settings.admin_card_accent || '#6c5ce7' %>">
+              <span style="font-size:0.8rem;color:#888;display:block;margin-top:3px;"><%= settings.admin_card_accent || '#6c5ce7' %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem;margin-bottom:30px;">Guardar Colores</button>
+    </form>
+  </div>
+</body>
+</html>

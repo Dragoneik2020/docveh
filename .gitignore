@@ -1,0 +1,12 @@
+node_modules/
+.env
+database.sqlite
+database.sqlite-shm
+database.sqlite-wal
+backups/
+tmp/
+*.zip
+public/uploads/
+Copilot_*.png
+logo_1.png
+logo_2.png

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suscripciones - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/dashboard" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions" style="color:#4cc9f0;font-weight:600;"><%= planName || 'Plan Gratuito' %></a>
+        <% if (userRole === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Planes y Suscripciones</h1>
+    </div>
+
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <% if (success) { %><div class="alert" style="background:#d4edda;color:#155724;border:1px solid #c3e6cb;"><%= success %></div><% } %>
+
+    <% if (pendingPayment) { %>
+      <div style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:12px;border-radius:6px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <span><strong>Pago pendiente de verificación:</strong> Ref: <%= pendingPayment.reference %> — pendiente de aprobación por el administrador.</span>
+        <form method="POST" action="/payment/<%= pendingPayment.id %>/cancel" style="display:inline;" onsubmit="return confirm('¿Cancelar este pago pendiente? Podrás iniciar uno nuevo después.')">
+          <button type="submit" class="btn btn-danger" style="padding:6px 14px;font-size:0.85rem;">Cancelar Pago</button>
+        </form>
+      </div>
+    <% } %>
+
+    <!-- Plan actual -->
+    <div class="card">
+      <h3>Tu Plan Actual: <span style="color:#4cc9f0;"><%= currentPlan.name %></span></h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-top:15px;">
+        <div><strong>Vehículos:</strong> <%= vehicleCount %> / <%= currentPlan.max_vehicles %></div>
+        <div><strong>Documentos:</strong> <%= docCount %> / <%= currentPlan.max_documents %></div>
+        <div><strong>Enlaces NFC:</strong> <%= nfcCount %> / <%= currentPlan.max_nfc_links %></div>
+        <div><strong>PIN protección:</strong> <%= currentPlan.has_pin_protection ? '✓ Sí' : '✗ No' %></div>
+      </div>
+    </div>
+
+    <!-- Comparativa de planes -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;margin-top:20px;">
+      <% plans.forEach(p => { %>
+        <div class="card" style="display:flex;flex-direction:column;position:relative;overflow:hidden;
+          <% if (p.id === currentPlan.id) { %>border:2px solid #4cc9f0;<% } %>">
+          <% if (p.id === currentPlan.id) { %>
+            <div style="position:absolute;top:12px;right:-30px;background:#4cc9f0;color:#1a1a2e;padding:4px 40px;transform:rotate(45deg);font-size:0.75rem;font-weight:700;">ACTUAL</div>
+          <% } %>
+          <div style="flex:1;">
+            <h3 style="font-size:1.4rem;margin-bottom:5px;"><%= p.name %></h3>
+            <div style="font-size:2rem;font-weight:700;color:#1a1a2e;margin:15px 0;">
+              <%= p.price === 0 ? 'Gratis' : '$' + p.price.toLocaleString('es-CL') %>
+              <% if (p.price > 0) { %><span style="font-size:1rem;color:#888;font-weight:400;">/año</span><% } %>
+            </div>
+            <ul style="list-style:none;padding:0;margin:20px 0;">
+              <li style="padding:8px 0;border-bottom:1px solid #f0f0f0;">🚗 <strong><%= p.max_vehicles %></strong> vehículos</li>
+              <li style="padding:8px 0;border-bottom:1px solid #f0f0f0;">📄 <strong><%= p.max_documents %></strong> documentos</li>
+              <li style="padding:8px 0;border-bottom:1px solid #f0f0f0;">📱 <strong><%= p.max_nfc_links %></strong> enlaces NFC</li>
+              <li style="padding:8px 0;border-bottom:1px solid #f0f0f0;">🔒 PIN protección: <%= p.has_pin_protection ? '✅' : '❌' %></li>
+              <li style="padding:8px 0;">📎 Hasta <strong><%= p.max_file_size %> MB</strong> por Archivo</li>
+            </ul>
+          </div>
+          <% if (p.id !== currentPlan.id) { %>
+            <% const isDowngrade = p.price < currentPlan.price && currentPlan.price > 0; %>
+            <% if (p.price === 0 && currentPlan.price === 0) { %>
+              <form method="POST" action="/subscriptions/change/<%= p.id %>">
+                <button type="submit" class="btn btn-secondary" style="width:100%;">Cambiar a Gratuito</button>
+              </form>
+            <% } else if (p.price === 0 && currentPlan.price > 0) { %>
+              <button class="btn btn-secondary" style="width:100%;cursor:not-allowed;" disabled title="No puedes cambiar a un plan gratuito teniendo un plan de pago activo">Cambiar a Gratuito (No disponible)</button>
+            <% } else if (isDowngrade) { %>
+              <button class="btn btn-secondary" style="width:100%;cursor:not-allowed;opacity:0.6;" disabled title="Bajar a <%= p.name %> (No disponible hasta que venza tu plan actual)">Bajar a <%= p.name %> (No disponible)</button>
+            <% } else if (pendingPayment && pendingPayment.plan_id === p.id) { %>
+              <a href="/payment/<%= p.id %>" class="btn" style="display:block;text-align:center;width:100%;background:#ffc107;color:#1a1a2e;padding:10px 15px;border-radius:6px;text-decoration:none;font-weight:600;">Pago Pendiente</a>
+            <% } else { %>
+              <form method="POST" action="/subscriptions/change/<%= p.id %>">
+                <button type="submit" class="btn btn-primary" style="width:100%;">Pagar y Mejorar — $<%= p.price.toLocaleString('es-CL') %></button>
+              </form>
+            <% } %>
+          <% } else { %>
+            <button class="btn btn-success" style="width:100%;cursor:default;" disabled>Plan Actual</button>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</body>
+</html>

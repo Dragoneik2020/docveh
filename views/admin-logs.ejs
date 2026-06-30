@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs Globales - DocVeh Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>🌐 Registro Global de Actividad</h1>
+    </div>
+
+    <div class="card">
+      <% if (logs.length === 0) { %>
+        <div class="empty-state"><p>No hay actividad registrada.</p></div>
+      <% } else { %>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:2px solid #eee;text-align:left;">
+                <th style="padding:10px 8px;">Fecha</th>
+                <th style="padding:10px 8px;">Usuario</th>
+                <th style="padding:10px 8px;">Acción</th>
+                <th style="padding:10px 8px;">Descripción</th>
+                <th style="padding:10px 8px;">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% logs.forEach(l => { %>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:10px 8px;color:#888;font-size:0.85rem;white-space:nowrap;"><%= l.created_at %></td>
+                  <td style="padding:10px 8px;font-weight:600;"><%= l.user_name || 'ID:' + l.user_id %></td>
+                  <td style="padding:10px 8px;">
+                    <span style="background:<%= l.action.startsWith('VEHICLE') ? '#e8f4fd' : l.action.startsWith('DOCUMENT') ? '#fef3e2' : l.action.startsWith('NFC') ? '#e8f8e8' : l.action.startsWith('ADMIN') ? '#fde8e8' : '#f0f0f0' %>;padding:3px 10px;border-radius:50px;font-size:0.8rem;font-weight:600;white-space:nowrap;">
+                      <%= l.action %>
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px;font-size:0.9rem;"><%= l.description %></td>
+                  <td style="padding:10px 8px;color:#888;font-size:0.8rem;font-family:monospace;"><%= l.ip_address || '-' %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% if (total > perPage) { %>
+          <div style="text-align:center;margin-top:20px;">
+            <% for (let i = 1; i <= Math.ceil(total / perPage); i++) { %>
+              <a href="/admin/logs?page=<%= i %>" style="display:inline-block;padding:6px 14px;margin:0 3px;background:<%= i === page ? '#e74c3c' : '#f0f0f0' %>;color:<%= i === page ? '#fff' : '#333' %>;border-radius:6px;text-decoration:none;font-weight:600;"><%= i %></a>
+            <% } %>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

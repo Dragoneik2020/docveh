@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backups - Admin - DocVeh</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- customCSS %>
+</head>
+<body>
+  <nav class="navbar admin-navbar">
+    <div class="container">
+      <a href="/admin" class="logo"><img src="/logo.png" alt="DocVeh" style="height:120px;vertical-align:middle;"> <span class="admin-badge" style="font-size:0.7rem;background:var(--admin-badge-bg);color:var(--admin-badge-text);padding:2px 8px;border-radius:4px;vertical-align:middle;">ADMIN</span></a>
+      <nav>
+        <span class="user-name"><%= userName %></span>
+        <a href="/profile">Mi Perfil</a>
+        <a href="/subscriptions"><%= planName || 'Plan Gratuito' %></a>
+        <div class="dropdown">
+          <a>Admin ▾</a>
+          <div class="dropdown-content">
+            <a href="/admin">Panel</a>
+            <a href="/admin/users">Usuarios</a>
+            <a href="/admin/payments">Pagos</a>
+            <a href="/admin/plans">Planes</a>
+            <a href="/admin/logs">Registros</a>
+            <a href="/admin/backups">Backups</a>
+            <a href="/admin/settings">Configuración</a>
+            <a href="/admin/colors">Colores</a>
+          </div>
+        </div>
+        <a href="/activity-log">📋 Actividad</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/new-vehicle">+ Añadir Vehículo</a>
+        <a href="/logout">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Backups de Base de Datos</h1>
+      <div style="display:flex;gap:10px;">
+        <a href="/admin" class="btn btn-secondary">← Volver</a>
+        <form method="POST" action="/admin/backups/create" style="display:inline;">
+          <button type="submit" class="btn btn-primary">Crear Backup Ahora</button>
+        </form>
+      </div>
+    </div>
+
+    <% if (message) { %><div class="alert" style="background:<%= message.includes('Error') ? '#fde8e8' : '#d4edda' %>;color:<%= message.includes('Error') ? '#c0392b' : '#155724' %>;border:1px solid <%= message.includes('Error') ? '#f5c6cb' : '#c3e6cb' %>;"><%= message %></div><% } %>
+
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Archivo</th>
+            <th>Tamaño</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (backups.length === 0) { %>
+            <tr><td colspan="3" style="text-align:center;padding:30px;color:#888;">No hay backups disponibles. El backup automático se ejecuta cada hora.</td></tr>
+          <% } %>
+          <% backups.forEach(b => { %>
+            <tr>
+              <td style="font-family:'Courier New',monospace;font-size:0.85rem;"><%= b.file %></td>
+              <td><%= b.size %></td>
+              <td><%= b.date %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="background:#e9f7ef;color:#155724;border:1px solid #c3e6cb;">
+      <p style="margin:0;font-size:0.9rem;">
+        <strong>Información:</strong> Los backups se crean automáticamente cada 30 minutos y antes de cada modificación en la plataforma (mínimo 5 min entre backups). Se mantienen hasta los 7 más recientes. Los más antiguos se eliminan automáticamente. Los backups están en la carpeta <code>backups/</code> del proyecto.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
