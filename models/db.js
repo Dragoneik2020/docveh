@@ -17,6 +17,7 @@ db.exec(`
     max_documents INTEGER NOT NULL,
     max_nfc_links INTEGER NOT NULL,
     has_pin_protection INTEGER DEFAULT 0,
+    has_nfc INTEGER DEFAULT 1,
     max_file_size INTEGER DEFAULT 10,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
