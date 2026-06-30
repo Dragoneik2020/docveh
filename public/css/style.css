@@ -168,7 +168,7 @@ body {
 .vehicle-card .detail { color: var(--detail-color); font-size: 0.9rem; margin: 4px 0; }
 .vehicle-card .actions { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-.section-title { color: var(--subtitle-color); }
+h3.section-title, h4.section-title { color: var(--subtitle-color); }
 
 /* NFC Public View */
 .nfc-public .info-list { display: flex; flex-direction: column; gap: 3px; }
