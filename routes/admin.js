@@ -341,6 +341,29 @@ router.post('/admin/settings', adminAuth, logoUpload, async (req, res) => {
   }
 });
 
+router.get('/admin/notifications', adminAuth, async (req, res) => {
+  try {
+    const s = await settings.getAll();
+    const msg = req.query.msg || null;
+    res.render('admin-notifications', { settings: s, msg, userName: req.session.userName, planName: req.session.planName });
+  } catch (err) {
+    res.redirect('/admin');
+  }
+});
+
+router.post('/admin/notifications', adminAuth, async (req, res) => {
+  try {
+    const keys = Object.keys(req.body);
+    for (const key of keys) {
+      await settings.set(key, req.body[key]);
+    }
+    await activity.log(req.session.userId, 'ADMIN_SETTINGS', 'Configuración de notificaciones actualizada', { ip: req.ip });
+    res.redirect('/admin/notifications?msg=Configuración guardada correctamente');
+  } catch (err) {
+    res.redirect('/admin');
+  }
+});
+
 router.get('/admin/colors', adminAuth, async (req, res) => {
   try {
     const s = await settings.getAll();
