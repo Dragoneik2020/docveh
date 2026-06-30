@@ -29,7 +29,7 @@
     <% if (error) { %><div class="alert alert-error"><%- error %></div><% } %>
 
     <form method="POST" action="/new-vehicle">
-      <h4 style="color:#1a1a2e;margin-bottom:15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🔑 Identificación</h4>
+      <h4 class="section-title" style="margin-bottom:15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🔑 Identificación</h4>
       <div class="form-group">
         <label>Matrícula *</label>
         <input type="text" name="plate" required placeholder="Ej: 1234ABC">
@@ -39,7 +39,7 @@
         <input type="text" name="vin" placeholder="17 caracteres (ej: WBA3A5C5XDF123456)">
       </div>
 
-      <h4 style="color:#1a1a2e;margin:20px 0 15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🚗 Datos del Vehículo</h4>
+      <h4 class="section-title" style="margin:20px 0 15px;border-bottom:2px solid #4cc9f0;padding-bottom:8px;">🚗 Datos del Vehículo</h4>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 15px;">
         <div class="form-group">
           <label>Marca *</label>
