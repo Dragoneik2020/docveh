@@ -362,4 +362,110 @@ router.post('/admin/colors', adminAuth, async (req, res) => {
   }
 });
 
+// TEMP: Import legacy data from SQLite
+router.get('/admin/import-legacy-data', adminAuth, async (req, res) => {
+  try {
+    const jsonPath = path.join(__dirname, '..', 'migration-data.json');
+    if (!fs.existsSync(jsonPath)) return res.send('No migration-data.json found');
+
+    const raw = fs.readFileSync(jsonPath, 'utf-8');
+    const data = JSON.parse(raw);
+
+    const { pool } = db;
+
+    // Import plans (skip existing)
+    for (const row of data.plans) {
+      await pool.query(
+        'INSERT INTO plans (id, name, description, price, max_vehicles, max_documents, max_nfc_links, has_pin_protection, has_nfc, max_file_size, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.name, row.description, row.price, row.max_vehicles, row.max_documents, row.max_nfc_links, row.has_pin_protection, row.has_nfc, row.max_file_size, row.created_at]
+      );
+    }
+
+    // Import users
+    for (const row of data.users) {
+      await pool.query(
+        'INSERT INTO users (id, name, email, password, google_id, avatar, role, plan_id, subscription_end, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.name, row.email, row.password, row.google_id, row.avatar, row.role, row.plan_id, row.subscription_end, row.created_at]
+      );
+    }
+
+    // Reset sequences
+    await pool.query("SELECT setval('plans_id_seq', (SELECT MAX(id) FROM plans))");
+    await pool.query("SELECT setval('users_id_seq', (SELECT MAX(id) FROM users))");
+
+    // Import vehicles
+    for (const row of data.vehicles) {
+      await pool.query(
+        'INSERT INTO vehicles (id, user_id, brand, model, year, plate, vin, owner_name, owner_dni, color, fuel_type, engine_capacity, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.user_id, row.brand, row.model, row.year, row.plate, row.vin, row.owner_name, row.owner_dni, row.color, row.fuel_type, row.engine_capacity, row.created_at]
+      );
+    }
+
+    // Import documents
+    for (const row of data.documents) {
+      await pool.query(
+        'INSERT INTO documents (id, vehicle_id, type, filename, original_name, expiration_date, uploaded_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.vehicle_id, row.type, row.filename, row.original_name, row.expiration_date, row.uploaded_at]
+      );
+    }
+
+    // Import subscriptions
+    for (const row of data.subscriptions) {
+      await pool.query(
+        'INSERT INTO subscriptions (id, user_id, plan_id, status, started_at, expires_at, source) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.user_id, row.plan_id, row.status, row.started_at, row.expires_at, row.source]
+      );
+    }
+
+    // Import payments
+    for (const row of data.payments) {
+      await pool.query(
+        'INSERT INTO payments (id, user_id, plan_id, amount, reference, status, flow_order, flow_url, flow_token, created_at, confirmed_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.user_id, row.plan_id, row.amount, row.reference, row.status, row.flow_order, row.flow_url, row.flow_token, row.created_at, row.confirmed_at]
+      );
+    }
+
+    // Import NFC links
+    for (const row of data.nfc_links) {
+      await pool.query(
+        'INSERT INTO nfc_links (id, vehicle_id, token, pin, active, created_at) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.vehicle_id, row.token, row.pin, row.active, row.created_at]
+      );
+    }
+
+    // Import activity log
+    for (const row of data.activity_log) {
+      await pool.query(
+        'INSERT INTO activity_log (id, user_id, action, description, vehicle_id, document_id, nfc_id, ip_address, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING',
+        [row.id, row.user_id, row.action, row.description, row.vehicle_id, row.document_id, row.nfc_id, row.ip_address, row.created_at]
+      );
+    }
+
+    // Import settings
+    for (const row of data.settings) {
+      await pool.query(
+        'INSERT INTO settings (key, value, updated_at) VALUES ($1,$2,$3) ON CONFLICT (key) DO NOTHING',
+        [row.key, row.value, row.updated_at]
+      );
+    }
+
+    const counts = {
+      plans: data.plans.length,
+      users: data.users.length,
+      vehicles: data.vehicles.length,
+      documents: data.documents.length,
+      subscriptions: data.subscriptions.length,
+      payments: data.payments.length,
+      nfc_links: data.nfc_links.length,
+      activity_log: data.activity_log.length,
+      settings: data.settings.length,
+    };
+
+    res.json({ success: true, imported: counts });
+  } catch (err) {
+    console.error('Import error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
