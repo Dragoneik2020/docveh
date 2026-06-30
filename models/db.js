@@ -209,6 +209,15 @@ async function init() {
       ['danger_color', '#e74c3c'],
       ['notification_email', ''],
       ['admin_phone', ''],
+      ['smtp_host', ''],
+      ['smtp_port', '587'],
+      ['smtp_secure', 'false'],
+      ['smtp_user', ''],
+      ['smtp_pass', ''],
+      ['smtp_from', ''],
+      ['twilio_account_sid', ''],
+      ['twilio_auth_token', ''],
+      ['twilio_whatsapp_number', ''],
     ];
     for (const [k, v] of defaultSettings) {
       await pool.query(

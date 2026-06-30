@@ -2,43 +2,44 @@ const nodemailer = require('nodemailer');
 const twilio = require('twilio');
 const { pool } = require('../models/db');
 
-function getTransporter() {
-  if (!process.env.SMTP_HOST) return null;
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+async function getSetting(key) {
+  const { rows } = await pool.query('SELECT value FROM settings WHERE key = $1', [key]);
+  return rows.length ? rows[0].value : null;
+}
+
+async function getTransporter() {
+  const host = await getSetting('smtp_host') || process.env.SMTP_HOST;
+  if (!host) return null;
+  const port = parseInt(await getSetting('smtp_port') || process.env.SMTP_PORT || '587');
+  const secure = (await getSetting('smtp_secure') || process.env.SMTP_SECURE || 'false') === 'true';
+  const user = await getSetting('smtp_user') || process.env.SMTP_USER;
+  const pass = await getSetting('smtp_pass') || process.env.SMTP_PASS;
+  if (!user || !pass) return null;
+  return nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
 }
 
 async function sendEmail(to, subject, text) {
-  const transporter = getTransporter();
+  const transporter = await getTransporter();
   if (!transporter) return;
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to,
-      subject,
-      text,
-    });
+    const from = await getSetting('smtp_from') || process.env.SMTP_FROM || (await getSetting('smtp_user')) || process.env.SMTP_USER;
+    await transporter.sendMail({ from, to, subject, text });
   } catch (err) {
     console.error('  Email error:', err.message);
   }
 }
 
-function getTwilioClient() {
-  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) return null;
-  return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+async function getTwilioClient() {
+  const sid = await getSetting('twilio_account_sid') || process.env.TWILIO_ACCOUNT_SID;
+  const token = await getSetting('twilio_auth_token') || process.env.TWILIO_AUTH_TOKEN;
+  if (!sid || !token) return null;
+  return twilio(sid, token);
 }
 
 async function sendWhatsApp(to, message) {
-  const client = getTwilioClient();
+  const client = await getTwilioClient();
   if (!client) return;
-  const from = process.env.TWILIO_WHATSAPP_NUMBER;
+  const from = await getSetting('twilio_whatsapp_number') || process.env.TWILIO_WHATSAPP_NUMBER;
   if (!from) return;
   try {
     await client.messages.create({
@@ -52,20 +53,12 @@ async function sendWhatsApp(to, message) {
 }
 
 async function notifyNewUser(user) {
-  const { rows } = await pool.query("SELECT value FROM settings WHERE key = 'notification_email'");
-  const notificationEmail = rows.length ? rows[0].value : null;
-  const { rows: phoneRows } = await pool.query("SELECT value FROM settings WHERE key = 'admin_phone'");
-  const adminPhone = phoneRows.length ? phoneRows[0].value : null;
-
+  const notificationEmail = await getSetting('notification_email');
+  const adminPhone = await getSetting('admin_phone');
   const subject = 'Nuevo registro - DocVeh';
   const text = 'Nuevo usuario registrado en DocVeh:\n\nNombre: ' + user.name + '\nEmail: ' + user.email + '\nFecha: ' + new Date().toLocaleString('es-CL');
-
-  if (notificationEmail) {
-    await sendEmail(notificationEmail, subject, text);
-  }
-  if (adminPhone) {
-    await sendWhatsApp(adminPhone, text);
-  }
+  if (notificationEmail) await sendEmail(notificationEmail, subject, text);
+  if (adminPhone) await sendWhatsApp(adminPhone, text);
 }
 
 module.exports = { notifyNewUser };
